@@ -15,7 +15,7 @@
 #include <fstream>
 #include <climits>
 #include <numeric>
-#include <atcoder/all>
+// #include <atcoder/all>
 
 #define fi first
 #define se second
@@ -116,10 +116,10 @@ void print(ld x){printf("%.20Lf\n", x);}
 
 ////////////////////////////////////////////////////////////////
 // [l, r) の範囲で「x以上」が初めて現れる位置を返す
-int my_lower_bound(const vector<int>& a, int x) {
-    int l = 0, r = (int)a.size();
+ll my_lower_bound(const vector<ll>& a, ll x) {
+    ll l = 0, r = (ll)a.size();
     while (l < r) {
-        int mid = l + (r - l) / 2;
+        ll mid = l + (r - l) / 2;
         if (a[mid] < x) {
             l = mid + 1;
         } else {
@@ -130,10 +130,10 @@ int my_lower_bound(const vector<int>& a, int x) {
 }
 
 // [l, r) の範囲で「xより大きい」が初めて現れる位置を返す
-int my_upper_bound(const vector<int>& a, int x) {
-    int l = 0, r = (int)a.size();
+ll my_upper_bound(const vector<ll>& a, ll x) {
+    ll l = 0, r = (ll)a.size();
     while (l < r) {
-        int mid = l + (r - l) / 2;
+        ll mid = l + (r - l) / 2;
         if (a[mid] <= x) {
             l = mid + 1;
         } else {
@@ -144,127 +144,145 @@ int my_upper_bound(const vector<int>& a, int x) {
 }
 
 int main(){
-    string S = "abcdefghijklmnopqrstuvwxyz";
-    cout << S.size() << endl;
-    ll l = 2;
-    ll r = 5;
-    cout << S.substr(l) << endl;//[l,)
-    cout << S.substr(l, r) << endl;//[l,l+r)
-    cout << S << endl;
-    reverse(all(S));
-    cout << S << endl;
-    reverse(S.begin() + 2,S.end() - 5);
-    cout << S << endl;
 
-    ll a = 4;
-    ll b = 6;
-    // VScodeだとエラーが出るが使える
-    // cout << __gcd(a, b) << endl;//最大公約数
-    // cout << a / __gcd(a, b) * b << endl;//最小公倍数
+    {
+        string S = "abcdefghijklmnopqrstuvwxyz";
+        cout << S.size() << endl;
+        ll l = 2;
+        ll r = 5;
+        cout << S.substr(l) << endl;//[l,)
+        cout << S.substr(l, r) << endl;//[l,l+r)
+        cout << S << endl;
+        reverse(all(S));
+        cout << S << endl;
+        reverse(S.begin() + 2,S.end() - 5);
+        cout << S << endl;
 
-    // 例 1: set に対して色々な操作を行う（1 個目は "End"、2 個目は "46" と出力される）
-    set<int> Set;
-    Set.insert(37); // その時点での Set の要素は {37}
-    Set.insert(15); // その時点での Set の要素は {15, 37}
-    Set.insert(37); // その時点での Set の要素は {15, 37}
-    auto itr1 = Set.lower_bound(40);
-    if (itr1 == Set.end()) cout << "End" << endl;
-    else cout << (*itr1) << endl;
-    Set.erase(37); // その時点での Set の要素は {15}
-    Set.insert(46); // その時点での Set の要素は {15, 46}
-    auto itr2 = Set.lower_bound(20);
-    if (itr2 == Set.end()) cout << "End" << endl;
-    else cout << (*itr2) << endl;
-
-    Set.clear();
-
-    // 例 2: a[1],a[2],...,a[N] を小さい順に出力する（同じ要素が複数ある場合 1 回だけ出力する）
-    set<int> Set2;
-    vl number = {1,2,3,4,5,6,7,8};
-    for (auto nn : number) Set2.insert(nn);
-    auto itr = Set2.begin();
-    while (itr != Set2.end()) {
-        cout << (*itr) << endl;
-        itr++;
+        ll a = 4;
+        ll b = 6;
+        cout << gcd(a, b) << endl;//最大公約数
+        cout << a / gcd(a, b) * b << endl;//最小公倍数
     }
 
-    multiset<int> ms;
-    ms.insert(7);
-    ms.insert(5);
-    ms.insert(2);
-    ms.insert(7);
-    ms.insert(5);
+    {
+        // 例 1: set に対して色々な操作を行う（1 個目は "End"、2 個目は "46" と出力される）
+        set<int> Set;
+        Set.insert(37); // その時点での Set の要素は {37}
+        Set.insert(15); // その時点での Set の要素は {15, 37}
+        Set.insert(37); // その時点での Set の要素は {15, 37}
+        auto itr1 = Set.lower_bound(40);
+        if (itr1 == Set.end()) cout << "End" << endl;
+        else cout << (*itr1) << endl;
+        Set.erase(37); // その時点での Set の要素は {15}
+        Set.insert(46); // その時点での Set の要素は {15, 46}
+        auto itr2 = Set.lower_bound(20);
+        if (itr2 == Set.end()) cout << "End" << endl;
+        else cout << (*itr2) << endl;
 
-    auto itr3 = ms.begin();
-    while (itr3 != Set2.end()) {
-        cout << (*itr3) << endl;
-        itr3++;
-    }
-    //multisetで一つだけ削除。イテレータを指定で削除（setも同じ）
-    auto it = ms.find(42);
-    if (it != ms.end()) {
-        ms.erase(it);
-    }
+        Set.clear();
 
-    //tuple
-    tuple<int, int, int> A;
-    cin >> get<0>(A) >> get<1>(A) >> get<2>(A);
-    cout << get<0>(A) + get<1>(A) + get<2>(A) << endl;
-    
-    // 例 2: vector にも tuple を入れられます、この例はソートするプログラムです
-    vector<tuple<double, int, int>> B; int N;
-    cin >> N;
-    for (int i = 1; i <= N; i++) {
-        double p1; int p2, p3;
-        cin >> p1 >> p2 >> p3;
-        B.push_back(make_tuple(p1, p2, p3));
-    }
-    sort(B.begin(), B.end());
-    for (int i = 0; i < N; i++) printf("%.5lf %d %d\n", get<0>(B[i]), get<1>(B[i]), get<2>(B[i]));
-
-    //順列
-    int n, sam[109]; cin >> n;
-    for (int i = 0; i < n; i++) cin >> sam[i];
-    do {
-        for (int i = 0; i < n; i++) {
-            if (i) cout << ",";
-            cout << sam[i];
+        // 例 2: a[1],a[2],...,a[N] を小さい順に出力する（同じ要素が複数ある場合 1 回だけ出力する）
+        set<int> Set2;
+        vl number = {1,2,3,4,5,6,7,8};
+        for (auto nn : number) Set2.insert(nn);
+        auto itr = Set2.begin();
+        while (itr != Set2.end()) {
+            cout << (*itr) << endl;
+            itr++;
         }
-        cout << endl;
-    } while(next_permutation(a, a + n));
+    }
 
-    //ラムダ式
-    //function<返り値の型(引数の型1, 引数の型2, ...)> 関数名 = [&](引数の型1 引数名1, 引数の型2, 引数名2, ...) { 関数の処理 };
-    function<ll(ll)> dfs = [&](ll n) {
-        if(n <= 0)return 0ll;
-        return dfs(n-1);
-    };
-    
-    //ワーシャルフロイドラムダ式
-    vvl dist(N,vl(N,INF));
-    function<void(ll)> dfs = [&](ll n) {
-        for (int k = 0; k < n; k++){       // 経由する頂点
-            for (int i = 0; i < n; i++) {    // 始点
-                for (int j = 0; j < n; j++) {  // 終点
-                    dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+    {
+        multiset<int> ms;
+        ms.insert(7);
+        ms.insert(5);
+        ms.insert(2);
+        ms.insert(7);
+        ms.insert(5);
+
+        auto itr3 = ms.begin();
+        while (itr3 != ms.end()) {
+            cout << (*itr3) << endl;
+            itr3++;
+        }
+        //multisetで一つだけ削除。イテレータを指定で削除（setも同じ）
+        auto it = ms.find(42);
+        if (it != ms.end()) {
+            ms.erase(it);
+        }
+    }
+
+    {
+        //tuple
+        tuple<int, int, int> A;
+        cin >> get<0>(A) >> get<1>(A) >> get<2>(A);
+        cout << get<0>(A) + get<1>(A) + get<2>(A) << endl;
+        
+        // 例 2: vector にも tuple を入れられます、この例はソートするプログラムです
+        vector<tuple<double, int, int>> B; int N;
+        cin >> N;
+        for (int i = 1; i <= N; i++) {
+            double p1; int p2, p3;
+            cin >> p1 >> p2 >> p3;
+            B.push_back(make_tuple(p1, p2, p3));
+        }
+        sort(B.begin(), B.end());
+        for (int i = 0; i < N; i++) printf("%.5lf %d %d\n", get<0>(B[i]), get<1>(B[i]), get<2>(B[i]));
+    }
+
+    {
+        //順列
+        vl a(8);
+        rep(i,8)a[i] = i;
+        do {
+            for (int i = 0; i < 8; i++) {
+                cout << a[i] << " ";
+            }
+            cout << endl;
+        } while(next_p(a));
+    }
+
+    {
+        //ラムダ式
+        //function<返り値の型(引数の型1, 引数の型2, ...)> 関数名 = [&](引数の型1 引数名1, 引数の型2, 引数名2, ...) { 関数の処理 };
+        function<ll(ll)> dfs = [&](ll n) {
+            if(n <= 0)return 0ll;
+            return dfs(n-1);
+        };
+
+        //ワーシャルフロイドラムダ式
+        ll N = 200;
+        vvl dist(N,vl(N,INF));
+        function<void(ll)> warshall_floyd = [&](ll n) {
+            for (int k = 0; k < n; k++){       // 経由する頂点
+                for (int i = 0; i < n; i++) {    // 始点
+                    for (int j = 0; j < n; j++) {  // 終点
+                        dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+                    }
                 }
             }
+        };
+    }
+
+    {
+        //自前lower_bound,upper_bound
+        vector<ll> a = {1, 2, 2, 2, 4, 5};
+
+        ll x = 2;
+        ll lb = my_lower_bound(a, x); // 1
+        ll ub = my_upper_bound(a, x); // 4
+
+        cout << "lower_bound index = " << lb << "\n";
+        cout << "upper_bound index = " << ub << "\n";
+    }
+
+    {
+        //部分集合の全探索　O(3^N)
+        ll N = 15;
+        ll L = (1ll << N);//Nは15ぐらいまで
+
+        for(ll m = 1; m < L; m++) for(ll k = m; k > 0; k = (k - 1) & m) {
+            //部分集合[k]と[m-k]から[m]を構築する
         }
-    };
-
-    vector<int> a = {1, 2, 2, 2, 4, 5};
-
-    int x = 2;
-    int lb = my_lower_bound(a, x); // 1
-    int ub = my_upper_bound(a, x); // 4
-
-    cout << "lower_bound index = " << lb << "\n";
-    cout << "upper_bound index = " << ub << "\n";
-
-
-    ll L = (1ll << N);//Nは15ぐらいまで
-
-    for(ll m = 1; m < L; m++) for(ll k = m; k > 0; k = (k - 1) & m) {
-        //部分集合[k]と[m-k]から[m]を構築する
     }
 }
