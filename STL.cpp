@@ -260,4 +260,11 @@ int main(){
 
     cout << "lower_bound index = " << lb << "\n";
     cout << "upper_bound index = " << ub << "\n";
+
+
+    ll L = (1ll << N);//Nは15ぐらいまで
+
+    for(ll m = 1; m < L; m++) for(ll k = m; k > 0; k = (k - 1) & m) {
+        //部分集合[k]と[m-k]から[m]を構築する
+    }
 }
