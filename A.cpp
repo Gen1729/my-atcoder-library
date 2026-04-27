@@ -39,6 +39,8 @@
 
 #define vc vector
 
+#define sz(s) (long long)(s.size())
+
 #define YES cout << "Yes" << endl;
 #define NO cout << "No" << endl;
 #define YN {cout << "Yes" << endl;}else{cout << "No" << endl;}
@@ -112,6 +114,23 @@ ll npow(ll x,ll y){
         cnt++;
     }
     return ans;
+}
+
+struct Edge {
+    ll to;
+    ll cost;
+};
+
+ll gcd(ll a, ll b) { return b?gcd(b,a%b):a;}
+ll lcm(ll a, ll b) { return a/gcd(a,b)*b;}
+
+// ai+bj=g
+// Ai+Bj=gcd(A,B)なるi,jを求める
+ll extgcd(ll a, ll b, ll& i, ll& j) {
+    if (b == 0) { i = 1; j = 0; return a;}
+    ll p = a/b, g = extgcd(b,a-b*p,j,i);
+    j -= p*i;
+    return g;
 }
 
 void print(ld x){printf("%.20Lf\n", x);}
