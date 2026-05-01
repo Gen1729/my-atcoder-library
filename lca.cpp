@@ -39,6 +39,8 @@
 
 #define vc vector
 
+#define sz(s) (long long)(s.size())
+
 #define YES cout << "Yes" << endl;
 #define NO cout << "No" << endl;
 #define YN {cout << "Yes" << endl;}else{cout << "No" << endl;}
@@ -114,12 +116,24 @@ ll npow(ll x,ll y){
     return ans;
 }
 
-void print(ld x){printf("%.20Lf\n", x);}
-
 struct Edge {
     ll to;
     ll cost;
 };
+
+ll gcd(ll a, ll b) { return b?gcd(b,a%b):a;}
+ll lcm(ll a, ll b) { return a/gcd(a,b)*b;}
+
+// ai+bj=g
+// Ai+Bj=gcd(A,B)なるi,jを求める
+ll extgcd(ll a, ll b, ll& i, ll& j) {
+    if (b == 0) { i = 1; j = 0; return a;}
+    ll p = a/b, g = extgcd(b,a-b*p,j,i);
+    j -= p*i;
+    return g;
+}
+
+void print(ld x){printf("%.20Lf\n", x);}
 
 ////////////////////////////////////////////////////////////////
 // LCA (Binary Lifting)
@@ -129,35 +143,37 @@ struct Edge {
 struct LCA {
     ll n, LOG;
     vvl parent; // parent[k][v] = v の 2^k 個上
-    vl depth;
-    vvl g;
+    vl cost;    // cost[v] = root から v までの距離
+    vector<vector<pll>> g;
 
     LCA() {}
-    LCA(const vvl& graph, ll root = 0) {
+    LCA(const vector<vector<pll>>& graph, ll root = 0) {
         build(graph, root);
     }
 
-    void build(const vvl& graph, ll root = 0) {
+    void build(const vector<vector<pll>>& graph, ll root = 0) {
         g = graph;
         n = (ll)g.size();
         LOG = 1;
         while ((1 << LOG) <= n) LOG++;
 
         parent.assign(LOG, vl(n, -1));
-        depth.assign(n, -1);
+        cost.assign(n, 0);
 
-        // iterative DFS/BFS で深さと親(2^0)を計算
+        // iterative DFS/BFS で親と累積コストを計算
         queue<ll> q;
-        depth[root] = 0;
+        vb visited(n, false);
+        cost[root] = 0;
         parent[0][root] = -1;
+        visited[root] = true;
         q.push(root);
 
         while (!q.empty()) {
             ll v = q.front(); q.pop();
-            for (ll to : g[v]) {
-                if (to == parent[0][v]) continue;
-                if (depth[to] != -1) continue;
-                depth[to] = depth[v] + 1;
+            for (auto [to, c] : g[v]) {
+                if (visited[to]) continue;
+                visited[to] = true;
+                cost[to] = cost[v] + c;
                 parent[0][to] = v;
                 q.push(to);
             }
@@ -173,19 +189,26 @@ struct LCA {
     }
 
     ll lca(ll u, ll v) const {
-        if (depth[u] < depth[v]) swap(u, v);
+        if (cost[u] < cost[v]) swap(u, v);
 
-        // u を v と同じ深さまで上げる
-        ll diff = depth[u] - depth[v];
-        for (ll k = 0; k < LOG; k++) {
-            if (diff & (1 << k)) u = parent[k][u];
+        // u を v と同じコスト深さまで上げる
+        while (cost[u] > cost[v]) {
+            bool found = false;
+            for (ll k = LOG - 1; k >= 0; k--) {
+                if (parent[k][u] != -1 && cost[parent[k][u]] >= cost[v]) {
+                    u = parent[k][u];
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) u = parent[0][u];
         }
 
         if (u == v) return u;
 
         // 同時に上げる
         for (ll k = LOG - 1; k >= 0; k--) {
-            if (parent[k][u] != parent[k][v]) {
+            if (parent[k][u] != -1 && parent[k][v] != -1 && parent[k][u] != parent[k][v]) {
                 u = parent[k][u];
                 v = parent[k][v];
             }
@@ -195,7 +218,7 @@ struct LCA {
 
     ll dist(ll u, ll v) const {
         ll w = lca(u, v);
-        return depth[u] + depth[v] - 2 * depth[w];
+        return cost[u] + cost[v] - 2 * cost[w];
     }
 };
 
@@ -203,13 +226,13 @@ int main() {
     ll N;
     cin >> N;
 
-    vvl g(N);
+    vector<vector<pll>> g(N);
     for (ll i = 0; i < N - 1; i++) {
-        ll a, b;
-        cin >> a >> b;
+        ll a, b, c;
+        cin >> a >> b >> c;
         --a; --b;
-        g[a].push_back(b);
-        g[b].push_back(a);
+        g[a].push_back({b, c});
+        g[b].push_back({a, c});
     }
 
     ll root = 0;
