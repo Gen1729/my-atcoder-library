@@ -39,7 +39,7 @@
 
 #define vc vector
 
-#define sz(s) (long long)(s.size())
+#define for_sz(s) (long long)(s.size())
 
 #define YES cout << "Yes" << endl;
 #define NO cout << "No" << endl;
