@@ -263,6 +263,24 @@ public:
 		return output[v];
 	}
 
+	vl suffix_terminal_nodes(ll v) const {
+		vl res;
+		if (v < 0 || v >= (ll)nodes.size()) {
+			return res;
+		}
+		while (v != 0) {
+			if (terminal[v]) {
+				res.push_back(v);
+			}
+			v = nodes[v].link;
+		}
+		return res;
+	}
+
+	vl suffix_terminal_nodes() const {
+		return suffix_terminal_nodes(current);
+	}
+
 	ll node_count() const {
 		return (ll)nodes.size();
 	}
@@ -276,7 +294,7 @@ public:
 		return res;
 	}
 
-private:
+//private:
 	struct Node {
 		vl next;
 		ll link = 0;
@@ -336,6 +354,12 @@ int main() {
 	ll u = ac.next_state(v, 'e'); // 明示的に次頂点
 
 	bool D = ac.is_terminal(v); // vのsuffixに一致している文字列があるか判定
+
+	auto nodes = ac.suffix_terminal_nodes(v); // v の suffix に一致するパターン終端ノード一覧
+	for(auto nv : nodes){
+		cout << nv << " ";
+	}
+	cout << endl;
 	
 	return 0;
 }
