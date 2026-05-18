@@ -140,37 +140,42 @@ void print(ld x){printf("%.20Lf\n", x);}
 
 class AhoCorasick {
 public:
-	AhoCorasick(int alphabet_size = 26, char base_char = 'a')
+	AhoCorasick(ll alphabet_size = 26, char base_char = 'a')
 		: alpha(alphabet_size), base(base_char) {
 		nodes.emplace_back(alpha, -1, 0);
 		current = 0;
 	}
 
-	int add(const string &pattern) {
-		int v = 0;
+	ll add(const string &pattern) {
+		ll v = 0;
 		for (char ch : pattern) {
-			int c = ch - base;
+			ll c = ch - base;
 			if (c < 0 || c >= alpha) {
 				return -1;
 			}
 			if (nodes[v].next[c] == -1) {
-				nodes[v].next[c] = (int)nodes.size();
+				nodes[v].next[c] = (ll)nodes.size();
 				nodes.emplace_back(alpha, v, (char)(base + c));
+				terminal.push_back(false);
+				output.push_back(false);
 			}
 			v = nodes[v].next[c];
 		}
-		int id = (int)pattern_lengths.size();
+		ll id = (ll)pattern_lengths.size();
 		end_node.push_back(v);
-		pattern_lengths.push_back((int)pattern.size());
+		if (v >= 0 && v < (ll)terminal.size()) {
+			terminal[v] = true;
+		}
+		pattern_lengths.push_back((ll)pattern.size());
 		return id;
 	}
 
 	void build() {
-		queue<int> q;
+		queue<ll> q;
 		order.clear();
 		order.push_back(0);
-		for (int c = 0; c < alpha; ++c) {
-			int u = nodes[0].next[c];
+		for (ll c = 0; c < alpha; ++c) {
+			ll u = nodes[0].next[c];
 			if (u != -1) {
 				nodes[u].link = 0;
 				q.push(u);
@@ -181,10 +186,10 @@ public:
 		}
 
 		while (!q.empty()) {
-			int v = q.front();
+			ll v = q.front();
 			q.pop();
-			for (int c = 0; c < alpha; ++c) {
-				int u = nodes[v].next[c];
+			for (ll c = 0; c < alpha; ++c) {
+				ll u = nodes[v].next[c];
 				if (u != -1) {
 					nodes[u].link = nodes[nodes[v].link].next[c];
 					q.push(u);
@@ -194,31 +199,36 @@ public:
 				}
 			}
 		}
+		for (ll i = 1; i < (ll)order.size(); ++i) {
+			ll v = order[i];
+			ll p = nodes[v].link;
+			output[v] = terminal[v] || output[p];
+		}
 	}
 
 	vector<long long> count_matches(const string &text) const {
 		vector<long long> cnt(nodes.size(), 0);
-		int v = 0;
+		ll v = 0;
 		for (char ch : text) {
 			v = next_state(v, ch);
 			cnt[v]++;
 		}
-		for (int i = (int)order.size() - 1; i > 0; --i) {
-			int u = order[i];
+		for (ll i = (ll)order.size() - 1; i > 0; --i) {
+			ll u = order[i];
 			cnt[nodes[u].link] += cnt[u];
 		}
 		vector<long long> res(pattern_lengths.size(), 0);
-		for (int i = 0; i < (int)pattern_lengths.size(); ++i) {
+		for (ll i = 0; i < (ll)pattern_lengths.size(); ++i) {
 			res[i] = cnt[end_node[i]];
 		}
 		return res;
 	}
 
-	int next_state(int v, char ch) const {
-		if (v < 0 || v >= (int)nodes.size()) {
+	ll next_state(ll v, char ch) const {
+		if (v < 0 || v >= (ll)nodes.size()) {
 			return 0;
 		}
-		int c = ch - base;
+		ll c = ch - base;
 		if (c < 0 || c >= alpha) {
 			return 0;
 		}
@@ -229,31 +239,38 @@ public:
 		current = 0;
 	}
 
-	void set_state(int v) {
-		if (0 <= v && v < (int)nodes.size()) {
+	void set_state(ll v) {
+		if (0 <= v && v < (ll)nodes.size()) {
 			current = v;
 		} else {
 			current = 0;
 		}
 	}
 
-	int step(char ch) {
+	ll step(char ch) {
 		current = next_state(current, ch);
 		return current;
 	}
 
-	int get_state() const {
+	ll get_state() const {
 		return current;
 	}
 
-	int node_count() const {
-		return (int)nodes.size();
+	bool is_terminal(ll v) const {
+		if (v < 0 || v >= (ll)output.size()) {
+			return false;
+		}
+		return output[v];
+	}
+
+	ll node_count() const {
+		return (ll)nodes.size();
 	}
 
 	vector<string> node_strings() const {
 		vector<string> res(nodes.size());
-		for (int v = 1; v < (int)nodes.size(); ++v) {
-			int p = nodes[v].parent;
+		for (ll v = 1; v < (ll)nodes.size(); ++v) {
+			ll p = nodes[v].parent;
 			res[v] = res[p] + nodes[v].pch;
 		}
 		return res;
@@ -261,21 +278,23 @@ public:
 
 private:
 	struct Node {
-		vector<int> next;
-		int link = 0;
-		int parent = -1;
+		vl next;
+		ll link = 0;
+		ll parent = -1;
 		char pch = 0;
-		Node(int alpha, int parent_id, char parent_ch)
+		Node(ll alpha, ll parent_id, char parent_ch)
 			: next(alpha, -1), parent(parent_id), pch(parent_ch) {}
 	};
 
-	int alpha;
+	ll alpha;
 	char base;
 	vector<Node> nodes;
-	vector<int> pattern_lengths;
-	vector<int> end_node;
-	vector<int> order;
-	int current = 0;
+	vl pattern_lengths;
+	vl end_node;
+	vl order;
+	vb terminal = vb(1, false);
+	vb output = vb(1, false);
+	ll current = 0;
 };
 
 int main() {
@@ -289,15 +308,15 @@ int main() {
 	string text = "ahishers";
 	auto counts = ac.count_matches(text);
 
-	for (int i = 0; i < (int)patterns.size(); ++i) {
+	for (ll i = 0; i < (ll)patterns.size(); ++i) {
 		cout << patterns[i] << ":";
-		for (int cnt : counts) {
+		for (ll cnt : counts) {
 			cout << " " << cnt;
 		}
 		cout << "\n";
 	}
 
-    int n = ac.node_count(); // 頂点数を返す
+    ll n = ac.node_count(); // 頂点数を返す
     auto strs = ac.node_strings(); // strs[v] が頂点 v の文字列
 
     cout << n << endl;
@@ -313,8 +332,10 @@ int main() {
 
 	ac.set_state(0);         // 現在頂点を指定
 	ac.step('h');            // 1文字遷移
-	int v = ac.get_state();  // 現在頂点番号
-	int u = ac.next_state(v, 'e'); // 明示的に次頂点
+	ll v = ac.get_state();  // 現在頂点番号
+	ll u = ac.next_state(v, 'e'); // 明示的に次頂点
+
+	bool D = ac.is_terminal(v); // vのsuffixに一致している文字列があるか判定
 	
 	return 0;
 }
