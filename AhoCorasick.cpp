@@ -160,18 +160,21 @@ public:
 			v = nodes[v].next[c];
 		}
 		int id = (int)pattern_lengths.size();
-		nodes[v].out.push_back(id);
+		end_node.push_back(v);
 		pattern_lengths.push_back((int)pattern.size());
 		return id;
 	}
 
 	void build() {
 		queue<int> q;
+		order.clear();
+		order.push_back(0);
 		for (int c = 0; c < alpha; ++c) {
 			int u = nodes[0].next[c];
 			if (u != -1) {
 				nodes[u].link = 0;
 				q.push(u);
+				order.push_back(u);
 			} else {
 				nodes[0].next[c] = 0;
 			}
@@ -184,9 +187,8 @@ public:
 				int u = nodes[v].next[c];
 				if (u != -1) {
 					nodes[u].link = nodes[nodes[v].link].next[c];
-					const auto &link_out = nodes[nodes[u].link].out;
-					nodes[u].out.insert(nodes[u].out.end(), link_out.begin(), link_out.end());
 					q.push(u);
+					order.push_back(u);
 				} else {
 					nodes[v].next[c] = nodes[nodes[v].link].next[c];
 				}
@@ -194,14 +196,20 @@ public:
 		}
 	}
 
-	vector<vector<int>> match_positions(const string &text) const {
-		vector<vector<int>> res(pattern_lengths.size());
+	vector<long long> count_matches(const string &text) const {
+		vector<long long> cnt(nodes.size(), 0);
 		int v = 0;
-		for (int i = 0; i < (int)text.size(); ++i) {
-			v = next_state(v, text[i]);
-			for (int id : nodes[v].out) {
-				res[id].push_back(i - pattern_lengths[id] + 1);
-			}
+		for (char ch : text) {
+			v = next_state(v, ch);
+			cnt[v]++;
+		}
+		for (int i = (int)order.size() - 1; i > 0; --i) {
+			int u = order[i];
+			cnt[nodes[u].link] += cnt[u];
+		}
+		vector<long long> res(pattern_lengths.size(), 0);
+		for (int i = 0; i < (int)pattern_lengths.size(); ++i) {
+			res[i] = cnt[end_node[i]];
 		}
 		return res;
 	}
@@ -255,7 +263,6 @@ private:
 	struct Node {
 		vector<int> next;
 		int link = 0;
-		vector<int> out;
 		int parent = -1;
 		char pch = 0;
 		Node(int alpha, int parent_id, char parent_ch)
@@ -266,6 +273,8 @@ private:
 	char base;
 	vector<Node> nodes;
 	vector<int> pattern_lengths;
+	vector<int> end_node;
+	vector<int> order;
 	int current = 0;
 };
 
@@ -278,12 +287,12 @@ int main() {
 	ac.build();
 
 	string text = "ahishers";
-	auto positions = ac.match_positions(text);
+	auto counts = ac.count_matches(text);
 
 	for (int i = 0; i < (int)patterns.size(); ++i) {
 		cout << patterns[i] << ":";
-		for (int pos : positions[i]) {
-			cout << " " << pos;
+		for (int cnt : counts) {
+			cout << " " << cnt;
 		}
 		cout << "\n";
 	}
