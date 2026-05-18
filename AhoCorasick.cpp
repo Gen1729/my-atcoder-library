@@ -143,6 +143,7 @@ public:
 	AhoCorasick(ll alphabet_size = 26, char base_char = 'a')
 		: alpha(alphabet_size), base(base_char) {
 		nodes.emplace_back(alpha, -1, 0);
+		trie_children.emplace_back();
 		current = 0;
 	}
 
@@ -156,6 +157,8 @@ public:
 			if (nodes[v].next[c] == -1) {
 				nodes[v].next[c] = (ll)nodes.size();
 				nodes.emplace_back(alpha, v, (char)(base + c));
+				trie_children.emplace_back();
+				trie_children[v].push_back(nodes[v].next[c]);
 				terminal.push_back(false);
 				output.push_back(false);
 			}
@@ -263,6 +266,14 @@ public:
 		return output[v];
 	}
 
+	const vl &children(ll v) const {
+		static const vl empty;
+		if (v < 0 || v >= (ll)trie_children.size()) {
+			return empty;
+		}
+		return trie_children[v];
+	}
+
 	vl suffix_terminal_nodes(ll v) const {
 		vl res;
 		if (v < 0 || v >= (ll)nodes.size()) {
@@ -281,6 +292,19 @@ public:
 		return suffix_terminal_nodes(current);
 	}
 
+	string node_string(ll v) const {
+		if (v <= 0 || v >= (ll)nodes.size()) {
+			return string();
+		}
+		string res;
+		while (v != 0) {
+			res.push_back(nodes[v].pch);
+			v = nodes[v].parent;
+		}
+		reverse(res.begin(), res.end());
+		return res;
+	}
+
 	ll node_count() const {
 		return (ll)nodes.size();
 	}
@@ -297,9 +321,9 @@ public:
 //private:
 	struct Node {
 		vl next;
-		ll link = 0;
-		ll parent = -1;
-		char pch = 0;
+		ll link = 0; // 失敗リンク先の頂点
+		ll parent = -1; // 親頂点
+		char pch = 0; // 頂点が表す文字
 		Node(ll alpha, ll parent_id, char parent_ch)
 			: next(alpha, -1), parent(parent_id), pch(parent_ch) {}
 	};
@@ -310,6 +334,7 @@ public:
 	vl pattern_lengths;
 	vl end_node;
 	vl order;
+	vvl trie_children; // trie_children[v] でvの子供一覧
 	vb terminal = vb(1, false);
 	vb output = vb(1, false);
 	ll current = 0;
@@ -355,11 +380,20 @@ int main() {
 
 	bool D = ac.is_terminal(v); // vのsuffixに一致している文字列があるか判定
 
+	string s = ac.node_string(v); // vが表す文字列
+
+	for (ll u : ac.children(v)) {
+		// v -> u の Trie 辺一覧
+	}
+
 	auto nodes = ac.suffix_terminal_nodes(v); // v の suffix に一致するパターン終端ノード一覧
 	for(auto nv : nodes){
 		cout << nv << " ";
 	}
 	cout << endl;
+
+	// 失敗リンク先の頂点やその頂点の持つ文字は
+	// nodes[v].link nodes[v].pchで受け取れます
 	
 	return 0;
 }
