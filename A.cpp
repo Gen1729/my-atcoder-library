@@ -26,7 +26,7 @@
 
 #define nfor(i,s,n) for(ll i=(s);i<(n);i++)
 #define dfor(i,s,n) for(ll i=(s)-1;i>=n;i--)
-#define INF 2e18//9223372036854775807
+#define INF 2000000000000000000//9223372036854775807
 
 #define all(a)  a.begin(),a.end()
 #define rall(a) a.rbegin(),a.rend()
@@ -60,6 +60,7 @@
 using namespace std;
 //using namespace atcoder;
 using ll = long long;
+using ull = unsigned long long;
 using ld = long double;
 using pll = pair<ll,ll>;
 using vvvvvl = vector<vector<vector<vector<vector<ll> > > > >;
