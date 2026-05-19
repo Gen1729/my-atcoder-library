@@ -11,6 +11,11 @@
 #include <bitset>
 #include <tuple>
 #include <map>
+#include <bit>
+#include <array>
+#include <limits>
+#include <type_traits>
+#include <utility>
 #include <functional>
 #include <fstream>
 #include <climits>
