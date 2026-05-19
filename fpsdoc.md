@@ -150,6 +150,14 @@ f.divide(1, -1);
 
 こちらの方が定数倍が軽いです．
 
+以下のようにサイズ変更・代入・参照が可能です。
+```
+fps f = {1};
+f.resize(N+1);
+f[2] = 3;
+cout << f[5].val() << endl;
+```
+
 ## 問題への適用例：TDPC: F - 準急
 
 この問題の答えは，
@@ -163,20 +171,20 @@ $\frac{(1-z)(z-z^K)}{1-2z+z^{K+1}}$
 ```
 // ここに FPS ライブラリを貼る
 
-using mint = modint1000000007;
+using mint = modint998244353;
 using fps = FormalPowerSeries<mint>;
 using sfps = vector<pair<int, mint>>;
 
 int main() {
-  int n, k; cin >> n >> k;
+    int n, k; cin >> n >> k;
 
-  fps f = {1, -1};
-  f.resize(n+1);
+    fps f = {1, -1};
+    f.resize(n+1);
 
-  f *= sfps{{1, 1}, {k, -1}};
-  f /= sfps{{0, 1}, {1, -2}, {k+1, 1}};
+    f *= sfps{{1, 1}, {k, -1}};
+    f /= sfps{{0, 1}, {1, -2}, {k+1, 1}};
 
-  cout << f[n].val() << '\n';
+    cout << f[n].val() << '\n';
 }
 ```
 
