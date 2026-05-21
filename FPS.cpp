@@ -21,7 +21,7 @@
 #include <climits>
 #include <numeric>
 #include <cassert>
-//#include <atcoder/all>
+#include <atcoder/all>
 
 #define fi first
 #define se second
@@ -63,7 +63,7 @@
 #endif
 
 using namespace std;
-//using namespace atcoder;
+using namespace atcoder;
 using ll = long long;
 using ull = unsigned long long;
 using ld = long double;
@@ -305,6 +305,10 @@ struct FormalPowerSeries : vector<T> {
   F operator*(vector<pair<int, T>> g) const { return F(*this) *= g; }
   F operator/(vector<pair<int, T>> g) const { return F(*this) /= g; }
 };
+
+using mint = modint998244353;
+using fps = FormalPowerSeries<mint>;
+using sfps = vector<pair<int, mint>>;
 
 // mdあり
 int main(){
