@@ -233,27 +233,27 @@ struct FormalPowerSeries : vector<T> {
     return res;
   }
 
-  // fast: FMT-friendly modulus only
-  // O(n log n)
-  F &multiply_inplace(const F &g, int d = -1) {
-    int n = this->size();
-    if (d == -1) d = n;
-    assert(d >= 0);
-    *this = convolution(move(*this), g);
-    this->resize(d);
-    return *this;
-  }
-  F multiply(const F &g, const int d = -1) const { return F(*this).multiply_inplace(g, d); }
-  // O(n log n)
-  F &divide_inplace(const F &g, int d = -1) {
-    int n = this->size();
-    if (d == -1) d = n;
-    assert(d >= 0);
-    *this = convolution(move(*this), g.inv(d));
-    this->resize(d);
-    return *this;
-  }
-  F divide(const F &g, const int d = -1) const { return F(*this).divide_inplace(g, d); }
+  // // fast: FMT-friendly modulus only
+  // // O(n log n)
+  // F &multiply_inplace(const F &g, int d = -1) {
+  //   int n = this->size();
+  //   if (d == -1) d = n;
+  //   assert(d >= 0);
+  //   *this = convolution(move(*this), g);
+  //   this->resize(d);
+  //   return *this;
+  // }
+  // F multiply(const F &g, const int d = -1) const { return F(*this).multiply_inplace(g, d); }
+  // // O(n log n)
+  // F &divide_inplace(const F &g, int d = -1) {
+  //   int n = this->size();
+  //   if (d == -1) d = n;
+  //   assert(d >= 0);
+  //   *this = convolution(move(*this), g.inv(d));
+  //   this->resize(d);
+  //   return *this;
+  // }
+  // F divide(const F &g, const int d = -1) const { return F(*this).divide_inplace(g, d); }
 
   // // naive
   // // O(n^2)

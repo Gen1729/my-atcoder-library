@@ -120,6 +120,55 @@ $f \gets f/(1+cz^d)$ と更新
 時間計算量は 
 $O(N)$ です．
 
+### $\int{f}$ の計算
+
+- `F &integral_inplace()` : 
+$f \gets \int{f}$ と更新
+
+- `F integral()` : 
+$h \gets \int{f}$ と更新
+
+### $\frac{df}{dz}$ の計算
+
+- `F &derivative_inplace()` : 
+$f \gets \frac{df}{dz}$ と更新
+
+- `F derivative()` : 
+$h \gets \frac{df}{dz}$ と更新
+
+### $\log f$ の計算
+
+- `F &log_inplace(int d = -1)` : 
+$f \gets \log{f}$ と更新
+
+- `F log(const int d = -1)` : 
+$h \gets \log{f}$ と更新
+
+$d-1$ 次の項で打ち切る．デフォルトでは 
+$N$ 次の項で打ち切る.
+
+### $\exp f$ の計算
+
+- `F &exp_inplace(int d = -1)` : 
+$f \gets \exp{f}$ と更新
+
+- `F exp(const int d = -1)` : 
+$h \gets \exp{f}$ と更新
+
+$d-1$ 次の項で打ち切る．デフォルトでは 
+$N$ 次の項で打ち切る.
+
+### $f^k$ の計算
+
+- `F &pow_inplace(const ll k, int d = -1)` : 
+$f \gets f^k$ と更新
+
+- `F pow(const ll k, const int d = -1)` : 
+$h \gets f^k$ と更新
+
+$d-1$ 次の項で打ち切る．デフォルトでは 
+$N$ 次の項で打ち切る.
+
 ### 関数値評価
 
 - `T eval(const T &a)` : 
