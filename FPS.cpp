@@ -228,7 +228,7 @@ struct FormalPowerSeries : vector<T> {
   //   int n = (*this).size(), m = g.size();
   //   rrep(i, n) {
   //     (*this)[i] *= g[0];
-  //     nfor(j, 1, min(i+1, m)) (*this)[i] += (*this)[i-j] * g[j];
+  //     nfor(j, 1, min((ll)i+1, (ll)m)) (*this)[i] += (*this)[i-j] * g[j];
   //   }
   //   return *this;
   // }
@@ -237,7 +237,7 @@ struct FormalPowerSeries : vector<T> {
   //   T ig0 = g[0].inv();
   //   int n = (*this).size(), m = g.size();
   //   rep(i, n) {
-  //     nfor(j, 1, min(i+1, m)) (*this)[i] -= (*this)[i-j] * g[j];
+  //     nfor(j, 1, min((ll)i+1, (ll)m)) (*this)[i] -= (*this)[i-j] * g[j];
   //     (*this)[i] *= ig0;
   //   }
   //   return *this;
