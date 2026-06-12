@@ -143,6 +143,37 @@ ll my_upper_bound(const vector<ll>& a, ll x) {
     return l; // a.size() の場合は見つからない(末尾)
 }
 
+void triming(vc<vc<char>> &G, ll H, ll W,vc<vc<char>> &res, ll &h, ll &w,char space){
+    ll mx = H;
+    ll my = W;
+    ll Mx = 0;
+    ll My = 0;
+
+    rep(i,H)rep(j,W){
+        if(G[i][j] == space)continue;
+        chmin(mx,i);
+        chmax(Mx,i + 1);
+        chmin(my,j);
+        chmax(My,j + 1);
+    }
+
+    if(mx >= Mx || my >= My){
+        h = 0;
+        w = 0;
+        return;
+    }
+
+    h = Mx - mx;
+    w = My - my;
+
+    res.resize(h,vc<char>(w));
+
+    nfor(i,mx,Mx)nfor(j,my,My){
+        res[i - mx][j - my] = G[i][j];
+    }
+    return;
+}
+
 int main(){
 
     {
@@ -288,7 +319,7 @@ int main(){
 
     {
         // ラムダ式ソート関数の書き方
-        
+
         // キャプチャ []: ラムダ式の外側の変数を使いたい場合に指定する。通常は空 [] で問題ない。
         // 引数 (int a, int b): 比較する2つの要素を受け取る。
         // 戻り値: a を b より前にしたい場合（順序が正しい場合）に true を返す。
@@ -299,5 +330,37 @@ int main(){
         sort(vec.begin(), vec.end(), [](ll a, ll b) {
             return a > b;
         });
+    }
+
+    {
+        // 周りの空白行・列を取り除く関数
+
+        // 例
+        // G (H = 4,W = 4)
+        // ....
+        // ###.
+        // .#..
+        // ....
+        //
+        // trimedG (h = 2,w = 3)
+        // ###
+        // .#.
+
+        ll H,W;
+        cin >> H >> W;
+        vc<vc<char>> G(H,vc<char>(W));
+        rep(i,H)rep(j,W)cin >> G[i][j];
+
+        vc<vc<char>> trimedG;
+        ll h,w;
+        triming(G,H,W,trimedG,h,w,'.');
+
+        cout << h << " " << w << endl;
+        rep(i,h){
+            rep(j,w){
+                cout << trimedG[i][j];
+            }
+            cout << endl;
+        }
     }
 }

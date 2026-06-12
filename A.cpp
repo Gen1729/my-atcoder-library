@@ -87,6 +87,18 @@ bool out_grid(ll i, ll j, ll h, ll w){//trueならcontinueする
     return(!(0 <= i && i < h && 0 <= j && j<w));
 }
 
+template<class T>
+void cutoutV(vc<vc<T>> &G, ll H, ll W, ll mx, ll Mx, ll my, ll My){
+    if(!(0 <= mx && mx < H && 0 < Mx && Mx <= H && mx < Mx))return;
+    if(!(0 <= my && my < H && 0 < My && My <= H && my < My))return;
+
+    rep(i,Mx - mx)rep(j,My - my){
+        G[i][j] = G[i + mx][j + my];
+    }
+    G.resize(Mx - mx, vc<T>(My - my));
+    return;
+}
+
 ll MOD = 998244353;
 
 ll modpow(ll x,ll y,ll m){
