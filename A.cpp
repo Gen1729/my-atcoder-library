@@ -153,26 +153,21 @@ vl topological_sort(const vvl& G){
     ll N = (ll)G.size();
     vl indeg(N, 0), order;
     queue<ll> que;
-
     rep(u, N){
         for(ll v : G[u]) indeg[v]++;
     }
-
     rep(i, N){
         if(indeg[i] == 0) que.push(i);
     }
-
     while(!que.empty()){
         ll u = que.front();
         que.pop();
         order.pb(u);
-
         for(ll v : G[u]){
             indeg[v]--;
             if(indeg[v] == 0) que.push(v);
         }
     }
-
     return order;
 }
 
