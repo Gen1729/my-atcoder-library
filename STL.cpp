@@ -210,6 +210,12 @@ int main(){
         if (itr2 == Set.end()) cout << "End" << endl;
         else cout << (*itr2) << endl;
 
+        if(Set.contains(15)){
+            cout << "15 is in this Set." << endl;
+        }else{
+            cout << "15 is not in this Set." << endl;
+        }
+
         Set.clear();
 
         // 例 2: a[1],a[2],...,a[N] を小さい順に出力する（同じ要素が複数ある場合 1 回だけ出力する）
@@ -230,6 +236,8 @@ int main(){
         ms.insert(2);
         ms.insert(7);
         ms.insert(5);
+
+        cout << ms.count(7) << endl; // 7の含まれる個数を返す
 
         auto itr3 = ms.begin();
         while (itr3 != ms.end()) {
@@ -259,6 +267,28 @@ int main(){
         }
         sort(B.begin(), B.end());
         for (int i = 0; i < N; i++) printf("%.5lf %d %d\n", get<0>(B[i]), get<1>(B[i]), get<2>(B[i]));
+    }
+
+    {
+        //2次元累積和
+        //入力: H × W のグリッド
+        ll H, W;
+        cin >> H >> W;
+        vvl a(H,vl(W));
+        rep(i,H)rep(j,W) cin >> a[i][j];
+
+        // 二次元累積和
+        vvl s(H+1, vl(W+1, 0));
+        rep(i,H)rep(j,W)s[i+1][j+1] = s[i][j+1] + s[i+1][j] - s[i][j] + a[i][j];
+
+        // クエリ [x1, x2) × [y1, y2) の長方形区域の和
+        ll Q; 
+        cin >> Q;
+        rep(q,Q) {
+            ll x1, x2, y1, y2;
+            cin >> x1 >> x2 >> y1 >> y2;
+            cout << s[x2][y2] - s[x1][y2] - s[x2][y1] + s[x1][y1] << endl;
+        }   
     }
 
     {
