@@ -15,7 +15,6 @@
 #include <fstream>
 #include <climits>
 #include <numeric>
-#include <atcoder/all>
 
 #define fi first
 #define se second
