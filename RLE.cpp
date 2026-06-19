@@ -145,9 +145,9 @@ void print(ld x){printf("%.20Lf\n", x);}
 template<class T>
 struct Run {
     T value;
-    int l, r;
+    ll l, r;
 
-    int len() const {
+    ll len() const {
         return r - l;
     }
 };
@@ -157,10 +157,10 @@ template<class T>
 vector<Run<T>> rle(const vector<T>& v) {
     vector<Run<T>> res;
 
-    int n = (int)v.size();
+    ll n = (ll)v.size();
 
-    for (int l = 0; l < n;) {
-        int r = l + 1;
+    for (ll l = 0; l < n;) {
+        ll r = l + 1;
 
         while (r < n && v[l] == v[r]) {
             r++;
@@ -178,10 +178,10 @@ vector<Run<T>> rle(const vector<T>& v) {
 vector<Run<char>> rle(const string& s) {
     vector<Run<char>> res;
 
-    int n = (int)s.size();
+    ll n = (ll)s.size();
 
-    for (int l = 0; l < n;) {
-        int r = l + 1;
+    for (ll l = 0; l < n;) {
+        ll r = l + 1;
 
         while (r < n && s[l] == s[r]) {
             r++;
