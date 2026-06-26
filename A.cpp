@@ -21,6 +21,8 @@
 #include <climits>
 #include <numeric>
 #include <cassert>
+#include <cstdbool>
+#include <cstdint>
 //#include <atcoder/all>
 
 #define fi first
@@ -141,7 +143,7 @@ ll gcd(ll a, ll b) { return b?gcd(b,a%b):a;}
 ll lcm(ll a, ll b) { return a/gcd(a,b)*b;}
 
 // ai+bj=g
-// Ai+Bj=gcd(A,B)なるi,jを求める
+// ai+bj=gcd(a,b)なるi,jを求める
 ll extgcd(ll a, ll b, ll& i, ll& j) {
     if (b == 0) { i = 1; j = 0; return a;}
     ll p = a/b, g = extgcd(b,a-b*p,j,i);
@@ -175,6 +177,7 @@ ll MOD = 998244353;
 
 void print(ld x){printf("%.20Lf\n", x);}
 
+//using mint = modint998244353;
 ////////////////////////////////////////////////////////////////
 int main(){
     
