@@ -137,7 +137,6 @@ ll extgcd(ll a, ll b, ll& i, ll& j) {
 void print(ld x){printf("%.20Lf\n", x);}
 
 ////////////////////////////////////////////////////////////////
-
 class AhoCorasick {
 public:
 	AhoCorasick(ll alphabet_size = 26, char base_char = 'a')
@@ -344,7 +343,9 @@ int main() {
 	AhoCorasick ac(26, 'a'); // a-zの26文字
 	vector<string> patterns = {"he", "she", "his", "hers"};
 	for (const auto &p : patterns) {
-		ac.add(p);
+		ll id = ac.add(p);
+		// pに対応する頂点番号
+		ll vertex_num = ac.end_node[id];
 	}
 	ac.build();
 
@@ -392,8 +393,8 @@ int main() {
 	}
 	cout << endl;
 
-	// 失敗リンク先の頂点やその頂点の持つ文字は
-	// nodes[v].link nodes[v].pchで受け取れます
+	// 失敗リンク先の頂点やその頂点の持つ文字や親頂点は
+	// nodes[v].link nodes[v].pch nodes[v].parentで受け取れます
 	
 	return 0;
 }

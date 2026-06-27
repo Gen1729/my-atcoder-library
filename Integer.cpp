@@ -15,6 +15,9 @@
 #include <fstream>
 #include <climits>
 #include <numeric>
+#include <cstdbool>
+#include <cstdint>
+#include <atcoder/all>
 
 #define fi first
 #define se second
@@ -135,6 +138,20 @@ ll COM(ll n, ll k){
     if (n < 0 || k < 0) return 0;
     return fac[n] * (finv[k] * finv[n - k] % MOD) % MOD;
 }
+
+// mod pが素数でないがn,kが小さいとき
+const int MAX_C = 5000;
+vvl Com(MAX_C,vl(MAX_C,0));
+void calc_com() {
+    Com[0][0] = 1;
+    for (int i = 1; i < MAX_C; ++i) {
+        Com[i][0] = 1;
+        for (int j = 1; j < MAX_C; ++j) {
+            Com[i][j] = (Com[i-1][j-1] + Com[i-1][j]) % MOD;
+        }
+    }
+}
+
 //約数列挙
 vl makediv(ll n) {
     vl ld, ud;
@@ -239,7 +256,7 @@ vector<bool> Eratosthenes(ll N) {
 vector<bool> SegmentedSieve(ll A,ll B) {
     // √B 以下の素数を炙り出すための篩
     // ここでは大きめにサイズ 1100000 まで確保しておく
-    vector<bool> isprime(1100000, true);
+    vector<bool> isprime(10000000, true);
 
     // A 以上 B 以下の整数 v が素数かどうか
     // その答えは isprime2[v-A] に格納される
@@ -268,6 +285,42 @@ vector<bool> SegmentedSieve(ll A,ll B) {
     return isprime2;
 }
 
+// Miller-Rabin
+// miller_rabin(n) : 1以下の整数もしくは合成数ならfalse、素数ならtrueを返す
+uint64_t modmul(uint64_t a, uint64_t b, uint64_t n) {
+    return (uint64_t)(((__uint128_t)a) * ((__uint128_t)b) % ((__uint128_t)n));
+}
+uint64_t modpow(uint64_t a, uint64_t b, uint64_t n) {
+    uint64_t t = ((b & 1) == 0) ? 1 : a;
+    for (b >>= 1; b != 0; b >>= 1) {
+        a = modmul(a, a, n);
+	if ((b & 1) == 1) { t = modmul(t, a, n); } 
+    }
+    return t;
+}
+const uint64_t bases[] = {2,325,9375,28178,450775,9780504,1795265022};
+bool miller_rabin(uint64_t n) {
+    if (n == 2) { return true; }
+    if (n < 2 || (n & 1) == 0) { return false; }
+    uint64_t n1 = n - 1, d = n - 1;
+    uint32_t s = 0;
+    for (; (d & 1) == 0; d >>= 1) { s += 1; }
+    for (const auto& base : bases) {
+        uint64_t a = base;
+        if (a >= n) {
+	    a %= n;
+	    if (a == 0) { continue; }
+	}
+        uint64_t t = modpow(a, d, n);
+        if (t == 1) { continue; }
+        for (uint32_t j = 1; t != n1; ++j) {
+            if (j >= s) { return false; }
+            t = modmul(t, t, n);
+        }
+    }
+    return true;
+}
+
 //n進法をm進法に変換
 void ntom(string str, ll n, ll m, string &res) {
     unsigned long long sum = 0;
@@ -281,6 +334,81 @@ void ntom(string str, ll n, ll m, string &res) {
         sum /= m;
     } while (sum);
     reverse(all(res));
+}
+
+// A Bに巨大数を配列にしたもの　A+Bを計算する 符号はtrueなら+ falseなら-
+void integer_addition(vl &A, vl &B, bool Asign, bool Bsign, vl &res, bool &res_sign){
+
+    ll Asz = A.size();
+    ll Bsz = B.size();
+
+    ll sz = max(A.size(),B.size());
+    res.resize(sz,0);
+
+    bool sign = (Asign == Bsign);
+
+    rep(i,sz){
+        ll a = 0,b = 0;
+        if(Asz > i){
+            a = A[i];
+        }
+        if(Bsz > i){
+            b = B[i];
+        }
+        if(sign)res[i] = a + b;
+        else res[i] = a - b;
+    }
+
+    if(sign){
+        rep(i,sz){
+            if(i == sz - 1 && res[i] / 10 > 0){
+                res.pb(res[i] / 10);
+            }else if(i != sz - 1){
+                res[i+1] += res[i] / 10;
+            }
+            res[i] %= 10;
+        }
+        res_sign = true;
+    }else{
+        rep(i,sz-1){
+            if(res[i] < 0){
+                res[i] += 10;
+                res[i+1] -= 1;
+            }
+        }
+        res_sign = true;
+        if(res[sz-1] < 0){
+            res[sz - 1] += 10;
+
+            rep(i,sz){
+                res[i] = 9 - res[i];
+            }
+            res[0]++;
+            rep(i,sz){
+                if(res[i] == 10){
+                    res[i] = 0;
+                    res[i+1]++;
+                }else{
+                    break;
+                }
+            }
+
+            res_sign = false;
+        }
+    }
+
+    while(res.size() > 1){
+        if(res.back() == 0){
+            res.pob();
+        }else{
+            break;
+        }
+    }
+
+    if(!Asign)res_sign = 1 - res_sign;
+    if(res.size() == 1 && res[0] == 0)res_sign = true;
+
+    return;
 }
 
 int main() {
