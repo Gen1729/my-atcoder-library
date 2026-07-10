@@ -1,0 +1,269 @@
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <vector>
+#include <set>
+#include <cmath>
+#include <iomanip>
+#include <stack>
+#include <queue>
+#include <deque>
+#include <bitset>
+#include <tuple>
+#include <map>
+#include <bit>
+#include <array>
+#include <limits>
+#include <type_traits>
+#include <utility>
+#include <functional>
+#include <fstream>
+#include <climits>
+#include <numeric>
+#include <cassert>
+#include <cstdbool>
+#include <cstdint>
+//#include <atcoder/all>
+
+#define fi first
+#define se second
+#define rep(i,n) for(ll i=0;i<(n);i++)
+#define rrep(i,n) for(ll i=(n)-1;i>=0;i--)
+#define orep(i,n) for(ll i=1;i<=(n);i++)
+
+#define nfor(i,s,n) for(ll i=(s);i<(n);i++)
+#define dfor(i,s,n) for(ll i=(s)-1;i>=n;i--)
+#define INF 2000000000000000000//9223372036854775807
+
+#define all(a)  a.begin(),a.end()
+#define rall(a) a.rbegin(),a.rend()
+
+#define chmax(x,y) x = max(x,y)
+#define chmin(x,y) x = min(x,y)
+
+#define pb push_back
+#define pob pop_back
+
+#define vc vector
+
+#define for_sz(s) (long long)(s.size())
+
+#define YES cout << "Yes" << endl;
+#define NO cout << "No" << endl;
+#define YN {cout << "Yes" << endl;}else{cout << "No" << endl;}
+#define dame cout << -1 << endl;
+
+#define vc_unique(v) v.erase(unique(v.begin(), v.end()), v.end())
+#define vc_remove(v,x) v.erase(remove(v.begin(), v.end(),x), v.end())
+#define vc_rotate(v) rotate(v.begin(), v.begin()+1, v.end())
+
+#define pop_cnt(s) ll(popcount(uint64_t(s)))
+#define next_p(v) next_permutation(v.begin(),v.end())
+
+#ifndef ONLINE_JUDGE
+#define _GLIBCXX_DEBUG
+#endif
+
+using namespace std;
+//using namespace atcoder;
+using ll = long long;
+using ull = unsigned long long;
+using ld = long double;
+using pll = pair<ll,ll>;
+using vvvvvl = vector<vector<vector<vector<vector<ll> > > > >;
+using vvvvl = vector<vector<vector<vector<ll> > > >;
+using vvvl = vector<vector<vector<ll> > >;
+using vvl = vector<vector<ll> >;
+using vl = vector<ll>;
+using vb = vector<bool>;
+using vvb = vector<vector<bool> >;
+using Graph = vector<vector<ll> >;
+
+template<class T> using pq = priority_queue<T,vc<T>,less<T> >;
+template<class T> using pq_g = priority_queue<T,vc<T>,greater<T> >;
+
+ll dx[4] = {0,1,0,-1};ll ddx[8] = {1,1,0,-1,-1,-1,0,1};
+ll dy[4] = {1,0,-1,0};ll ddy[8] = {0,1,1,1,0,-1,-1,-1};
+
+bool out_grid(ll i, ll j, ll h, ll w){//trueならcontinueする
+    return(!(0 <= i && i < h && 0 <= j && j<w));
+}
+
+template<class T>
+void cutoutV(vc<vc<T>> &G, ll H, ll W, ll mx, ll Mx, ll my, ll My){
+    if(!(0 <= mx && mx < H && 0 < Mx && Mx <= H && mx < Mx))return;
+    if(!(0 <= my && my < H && 0 < My && My <= H && my < My))return;
+
+    rep(i,Mx - mx)rep(j,My - my){
+        G[i][j] = G[i + mx][j + my];
+    }
+    G.resize(Mx - mx, vc<T>(My - my));
+    return;
+}
+
+ll modpow(ll x,ll y,ll m){
+    ll a = x;
+    a %= m;
+    ll cnt = 0;
+    ll ans = 1;
+    while(y > 0){
+        if((1ll << cnt) & y){
+            y ^= (1ll << cnt);
+            ans *= a;
+            ans %= m;
+        }
+        a = a*a;
+        a %= m;
+        cnt++;
+    }
+    return ans;
+}
+
+ll npow(ll x,ll y){
+    ll a = x;
+    ll cnt = 0;
+    ll ans = 1;
+    while(y > 0){
+        if((1ll << cnt) & y){
+            y ^= (1ll << cnt);
+            ans *= a;
+        }
+        a = a*a;
+        cnt++;
+    }
+    return ans;
+}
+
+struct Edge {
+    ll to;
+    ll cost;
+};
+
+ll gcd(ll a, ll b) { return b?gcd(b,a%b):a;}
+ll lcm(ll a, ll b) { return a/gcd(a,b)*b;}
+
+// ai+bj=g
+// ai+bj=gcd(a,b)なるi,jを求める
+ll extgcd(ll a, ll b, ll& i, ll& j) {
+    if (b == 0) { i = 1; j = 0; return a;}
+    ll p = a/b, g = extgcd(b,a-b*p,j,i);
+    j -= p*i;
+    return g;
+}
+
+vl topological_sort(const vvl& G){
+    ll N = (ll)G.size();
+    vl indeg(N, 0), order;
+    queue<ll> que;
+    rep(u, N){
+        for(ll v : G[u]) indeg[v]++;
+    }
+    rep(i, N){
+        if(indeg[i] == 0) que.push(i);
+    }
+    while(!que.empty()){
+        ll u = que.front();
+        que.pop();
+        order.pb(u);
+        for(ll v : G[u]){
+            indeg[v]--;
+            if(indeg[v] == 0) que.push(v);
+        }
+    }
+    return order;
+}
+
+ll MOD = 998244353;
+
+void print(ld x){printf("%.20Lf\n", x);}
+
+//using mint = modint998244353;
+////////////////////////////////////////////////////////////////
+template <typename T, const T id>
+class convex_hull_trick {
+    struct line {
+        T a, b;
+        line(T a_ = 0, T b_ = 0) : a(a_), b(b_) {}
+        T get(T x) { return a * x + b; }
+    };
+    struct node {
+        line l;
+        node *lch, *rch;
+        node(line l_) : l(l_), lch(nullptr), rch(nullptr) {}
+        ~node() {
+            if (lch) delete lch;
+            if (rch) delete rch;
+        }
+    };
+
+private:
+    const int n;
+    const vector<T> pos;
+    node *root;
+
+public:
+    convex_hull_trick(const vector<T>& pos_) : n(pos_.size()), pos(pos_), root(nullptr) {}
+    ~convex_hull_trick() {
+        if (root) delete root;
+    }
+    void insert(T a, T b) {
+        line l(a, b);
+        root = modify(root, 0, n - 1, l);
+    }
+    T get(T x) const {
+        int t = lower_bound(pos.begin(), pos.end(), x) - pos.begin();
+        assert(t < n && pos[t] == x);
+        return sub(root, 0, n - 1, t);
+    }
+
+private:
+    node* modify(node *p, int lb, int ub, line& l) {
+        if (!p) return new node(l);
+        if (p->l.get(pos[lb]) >= l.get(pos[lb]) && p->l.get(pos[ub]) >= l.get(pos[ub])) return p;
+        if (p->l.get(pos[lb]) <= l.get(pos[lb]) && p->l.get(pos[ub]) <= l.get(pos[ub])) {
+            p->l = l;
+            return p;
+        }
+        int c = (lb + ub) / 2;
+        if (p->l.get(pos[c]) < l.get(pos[c])) swap(p->l, l);
+        if (p->l.get(pos[lb]) <= l.get(pos[lb]))
+            p->lch = modify(p->lch, lb, c, l);
+        else
+            p->rch = modify(p->rch, c + 1, ub, l);
+        return p;
+    }
+    T sub(node *p, int lb, int ub, int t) const {
+        if (!p) return id;
+        if (ub - lb == 0) return p->l.get(pos[t]);
+        int c = (lb + ub) / 2;
+        if (t <= c) return max(p->l.get(pos[t]), sub(p->lch, lb, c, t));
+        return max(p->l.get(pos[t]), sub(p->rch, c + 1, ub, t));
+    }
+};
+
+int main() {
+    // x の取りうる値を sort, unique したものを渡す。
+    vector<ll> xs = {0, 1, 2, 3, 4, 5};
+    sort(xs.begin(), xs.end());
+    xs.erase(unique(xs.begin(), xs.end()), xs.end());
+
+    convex_hull_trick<ll, -INF> cht(xs);
+
+    // 直線 f(x) = a * x + b を追加する。
+    cht.insert(2, 3);
+    cht.insert(-1, 10);
+    cht.insert(4, -5);
+
+    // get は最大値の取得。
+    ll x = 3;
+    cout << cht.get(x) << '\n';
+
+    // 最小値を求めたい場合は、追加時に (-a, -b) を入れて、取得時に - を付ける。
+    convex_hull_trick<ll, -INF> min_cht(xs);
+    min_cht.insert(-2, -3);  // 元の直線は 2x + 3
+    min_cht.insert(1, -10);  // 元の直線は -x + 10
+    min_cht.insert(-4, 5);   // 元の直線は 4x - 5
+    cout << -min_cht.get(x) << '\n';
+
+    return 0;
+}
