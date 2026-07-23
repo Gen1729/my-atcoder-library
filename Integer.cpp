@@ -167,6 +167,7 @@ vl makediv(ll n) {
     ld.insert(ld.end(), ud.begin(), ud.end());
     return ld;
 }
+
 //素因数分解
 vc<pll> prime_factorization(ll n) {
     vc<pll> ret;
@@ -185,6 +186,7 @@ vc<pll> prime_factorization(ll n) {
     }
     return ret;
 }
+
 //前計算をすることでlognで素因数分解
 struct PrimeFact {
     vl spf;
@@ -211,6 +213,7 @@ struct PrimeFact {
         return m;
     }
 };
+
 //逆元計算
 ll modinv(ll a, ll m) {
 	ll b = m, u = 1, v = 0;
@@ -223,6 +226,7 @@ ll modinv(ll a, ll m) {
 	if (u < 0) u += m;
 	return u;
 }
+
 //最大公約数
 ll GCD(ll A,ll B){
     while(A >= 1 && B >= 1){
@@ -234,6 +238,22 @@ ll GCD(ll A,ll B){
     }
     if(A != 0)return A;
     return B;
+}
+
+// $\sum^N_{i = 1} \floor{\frac{N}{i}}$ を $O(\sqrt{N})$ で求める
+ll sum_floor_div(ll N) {
+    ll ans = 0;
+    
+    // l は区間の左端
+    for (ll l = 1, r = 0; l <= N; l = r + 1) {
+        ll k = N / l; // この区間における floor(N / i) の値
+        r = N / k;           // 商が k となる最大の i (区間の右端)
+        
+        // (区間の長さ) * (商 k) を加算
+        ans += (r - l + 1) * k;
+    }
+    
+    return ans;
 }
 
 // エラトステレスの篩
