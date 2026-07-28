@@ -214,6 +214,37 @@ inline void sort_by_angle(vector<P>& pts, P base,
     });
 }
 
+inline auto make_angle_comparator(const P& base, SameAnglePlacement placement){
+    return [base, placement](const P& a, const P& b) -> bool {
+        bool sa = same_dir(base, a);
+        bool sb = same_dir(base, b);
+        if(sa != sb){
+            if(placement == SameAnglePlacement::First) return sa;
+            else return !sa;
+        }
+        return angle_less_from_base(a, b, base);
+    };
+}
+
+// pts は sort_by_angle(pts, base, placement) 済みであることを仮定
+// query と同じ偏角を持つ範囲の先頭位置(index)を返す
+inline int lower_bound_angle(const vector<P>& pts, const P& base, const P& query,
+                              SameAnglePlacement placement = SameAnglePlacement::First){
+    assert(!is_zero(base) && "base must not be (0,0)");
+    assert(!is_zero(query) && "query must not be (0,0)");
+    auto comp = make_angle_comparator(base, placement);
+    return int(std::lower_bound(pts.begin(), pts.end(), query, comp) - pts.begin());
+}
+
+// query と同じ偏角を持つ範囲の終端(次の位置)を返す
+inline int upper_bound_angle(const vector<P>& pts, const P& base, const P& query,
+                              SameAnglePlacement placement = SameAnglePlacement::First){
+    assert(!is_zero(base) && "base must not be (0,0)");
+    assert(!is_zero(query) && "query must not be (0,0)");
+    auto comp = make_angle_comparator(base, placement);
+    return int(std::upper_bound(pts.begin(), pts.end(), query, comp) - pts.begin());
+}
+
 } // namespace angle_sort
 
 
@@ -232,4 +263,23 @@ int main() {
     }
 
     // v は (1,0),(2,0),(3,0),(0,1),(-1,0),(0,-1) のように並ぶ（同偏角は距離昇順）
+
+
+    // 例2
+    v = {{1,0},{2,0},{0,1},{-1,0},{0,-1},{3,0}};
+    angle_sort::sort_by_angle(v, {1,0}, angle_sort::SameAnglePlacement::First);
+    // v: (1,0),(2,0),(3,0),(0,1),(-1,0),(0,-1)
+
+    //lower_bound_angle(pts, base, query, placement) → query と同じ偏角を持つ最初の要素の index
+    //upper_bound_angle(pts, base, query, placement) → query と同じ偏角を持つ要素の次の index
+
+    // (5,0) と同じ偏角、つまり (1,0) と同じ方向を持つ区間 [lo, hi) を求める
+    int lo = angle_sort::lower_bound_angle(v, {1,0}, {5,0});
+    int hi = angle_sort::upper_bound_angle(v, {1,0}, {5,0});
+    // lo=0, hi=3  ( (1,0),(2,0),(3,0) の3点)
+
+    // (0,7) と同じ偏角の点を探す
+    lo = angle_sort::lower_bound_angle(v, {1,0}, {0,7});
+    hi = angle_sort::upper_bound_angle(v, {1,0}, {0,7});
+    // lo=3, hi=4  ( (0,1) の1点)
 }
