@@ -11,11 +11,18 @@
 #include <bitset>
 #include <tuple>
 #include <map>
+#include <bit>
+#include <array>
+#include <limits>
+#include <type_traits>
+#include <utility>
 #include <functional>
 #include <fstream>
 #include <climits>
 #include <numeric>
 #include <cassert>
+#include <cstdbool>
+#include <cstdint>
 //#include <atcoder/all>
 
 #define fi first
@@ -26,7 +33,7 @@
 
 #define nfor(i,s,n) for(ll i=(s);i<(n);i++)
 #define dfor(i,s,n) for(ll i=(s)-1;i>=n;i--)
-#define INF 2e18//9223372036854775807
+#define INF 2000000000000000000//9223372036854775807
 
 #define all(a)  a.begin(),a.end()
 #define rall(a) a.rbegin(),a.rend()
@@ -38,6 +45,8 @@
 #define pob pop_back
 
 #define vc vector
+
+#define for_sz(s) (long long)(s.size())
 
 #define YES cout << "Yes" << endl;
 #define NO cout << "No" << endl;
@@ -58,6 +67,7 @@
 using namespace std;
 //using namespace atcoder;
 using ll = long long;
+using ull = unsigned long long;
 using ld = long double;
 using pll = pair<ll,ll>;
 using vvvvvl = vector<vector<vector<vector<vector<ll> > > > >;
@@ -79,7 +89,17 @@ bool out_grid(ll i, ll j, ll h, ll w){//trueならcontinueする
     return(!(0 <= i && i < h && 0 <= j && j<w));
 }
 
-ll MOD = 998244353;
+template<class T>
+void cutoutV(vc<vc<T>> &G, ll H, ll W, ll mx, ll Mx, ll my, ll My){
+    if(!(0 <= mx && mx < H && 0 < Mx && Mx <= H && mx < Mx))return;
+    if(!(0 <= my && my < H && 0 < My && My <= H && my < My))return;
+
+    rep(i,Mx - mx)rep(j,My - my){
+        G[i][j] = G[i + mx][j + my];
+    }
+    G.resize(Mx - mx, vc<T>(My - my));
+    return;
+}
 
 ll modpow(ll x,ll y,ll m){
     ll a = x;
@@ -123,7 +143,7 @@ ll gcd(ll a, ll b) { return b?gcd(b,a%b):a;}
 ll lcm(ll a, ll b) { return a/gcd(a,b)*b;}
 
 // ai+bj=g
-// Ai+Bj=gcd(A,B)なるi,jを求める
+// ai+bj=gcd(a,b)なるi,jを求める
 ll extgcd(ll a, ll b, ll& i, ll& j) {
     if (b == 0) { i = 1; j = 0; return a;}
     ll p = a/b, g = extgcd(b,a-b*p,j,i);
@@ -131,149 +151,190 @@ ll extgcd(ll a, ll b, ll& i, ll& j) {
     return g;
 }
 
+vl topological_sort(const vvl& G){
+    ll N = (ll)G.size();
+    vl indeg(N, 0), order;
+    queue<ll> que;
+    rep(u, N){
+        for(ll v : G[u]) indeg[v]++;
+    }
+    rep(i, N){
+        if(indeg[i] == 0) que.push(i);
+    }
+    while(!que.empty()){
+        ll u = que.front();
+        que.pop();
+        order.pb(u);
+        for(ll v : G[u]){
+            indeg[v]--;
+            if(indeg[v] == 0) que.push(v);
+        }
+    }
+    return order;
+}
+
+ll MOD = 998244353;
+
 void print(ld x){printf("%.20Lf\n", x);}
 
+//using mint = modint998244353;
 ////////////////////////////////////////////////////////////////
-const double eps = 1e-9;
-bool equal(double a, double b) { return abs(a-b) < eps;}
-const double PI = acos(-1.0);
+const ld INFld = 1LL<<60;
+const ld EPS = 1e-10;
+const ld PI = acosl(-1.0);
 
-///////////////////////////////////////////////////////////////
-// geom/vector.cpp 相当
-///////////////////////////////////////////////////////////////
-struct V {
-    double x, y;
-    V(double x=0, double y=0): x(x), y(y) {}
-    V& operator+=(const V& v) { x += v.x; y += v.y; return *this;}
-    V operator+(const V& v) const { return V(*this) += v;}
-    V& operator-=(const V& v) { x -= v.x; y -= v.y; return *this;}
-    V operator-(const V& v) const { return V(*this) -= v;}
-    V& operator*=(double s) { x *= s; y *= s; return *this;}
-    V operator*(double s) const { return V(*this) *= s;}
-    V& operator/=(double s) { x /= s; y /= s; return *this;}
-    V operator/(double s) const { return V(*this) /= s;}
-    double dot(const V& v) const { return x*v.x + y*v.y;}
-    double cross(const V& v) const { return x*v.y - v.x*y;}
-    double norm2() const { return x*x + y*y;}
-    double norm() const { return sqrt(norm2());}
-    double angleRad(const V& v) const { return atan2(abs(cross(v)), dot(v));}
-    double angleDeg(const V& v) const { return angleRad(v) * 180.0 / PI;}
-    V normalize() const { return *this/norm();}
-    V rotate90() const { return V(y, -x);}
-    int ort() const { // orthant
-        if (abs(x) < eps && abs(y) < eps) return 0;
-        if (y > 0) return x>0 ? 1 : 2;
-        else return x>0 ? 4 : 3;
-    }
-    bool operator<(const V& v) const {
-        int o = ort(), vo = v.ort();
-        if (o != vo) return o < vo;
-        return cross(v) > 0;
-    }
-};
-istream& operator>>(istream& is, V& v) {
-    is >> v.x >> v.y; return is;
+using Point = pair<ld, ld>;
+using Vector = Point;
+
+// 座標（ベクトル）の足し算、引き算（定数倍なども補助として実装）
+Point operator+(const Point& a, const Point& b) {
+    return {a.first + b.first, a.second + b.second};
 }
-ostream& operator<<(ostream& os, const V& v) {
-    os<<"("<<v.x<<","<<v.y<<")"; return os;
+Point operator-(const Point& a, const Point& b) {
+    return {a.first - b.first, a.second - b.second};
+}
+Point operator*(const Point& a, ld k) {
+    return {a.first * k, a.second * k};
+}
+Point operator/(const Point& a, ld k) {
+    return {a.first / k, a.second / k};
 }
 
-///////////////////////////////////////////////////////////////
-// geom/line.cpp 相当
-///////////////////////////////////////////////////////////////
+// ベクトルの内積・外積・長さの2乗
+// 内積 (Dot product)
+ld dot(const Vector& a, const Vector& b) {
+    return a.first * b.first + a.second * b.second;
+}
+
+// 外積 (Cross product)
+ld cross(const Vector& a, const Vector& b) {
+    return a.first * b.second - a.second * b.first;
+}
+
+// 長さの2乗 (Squared norm)
+ld norm2(const Vector& a) {
+    return a.first * a.first + a.second * a.second;
+}
+
+// 2点 p1, p2 の中点を求める
+Point midpoint(const Point& p1, const Point& p2) {
+    return (p1 + p2) / 2.0;
+}
+
+// 2点 p1, p2 間の距離を求める
+ld distance2(const Point& p1, const Point& p2) {
+    return norm2(p1 - p2); // hypotl(p1.first - p2.first, p1.second - p2.second) でも可
+}
+
+// ax+by+c=0 の形の直線
 struct Line {
-    V s, t;
-    Line(V s=V(0,0), V t=V(0,0)):s(s),t(t){}
-    V dir() const { return t-s;}
-    V normalize() const { return dir().normalize();}
-    double norm() const { return dir().norm();}
-    /* +1: s-t,s-p : ccw
-    * -1: s-t,s-p : cw
-    * +2: t-s-p
-    * -2: s-t-p
-    *  0: s-p-t */
-    int ccw(const V& p) const {
-        if (dir().cross(p-s) > eps) return +1;
-        if (dir().cross(p-s) < -eps) return -1;
-        if (dir().dot(p-s) < -eps) return +2;
-        if (dir().dot(t-p) < -eps) return -2;
-        return 0;
-    }
-    bool touch(const Line& l) const {
-        int a = ccw(l.s)*ccw(l.t), b = l.ccw(s)*l.ccw(t);
-        return !a || !b || (a == -1 && b == -1);
-    }
+    ld a, b, c;
 };
-///////////////////////////////////////////////////////////////
-// geom/circle.cpp 相当
-///////////////////////////////////////////////////////////////
-struct Circle {
-    V o; double r;
-    Circle(V o=V(), double r=0) : o(o), r(r) {}
-    vector<V> crossPoint(const Circle& c) {
-        V v = c.o-o;
-        double l = v.norm();
-        if (equal(l, 0)) return {};
-        if (equal(l+r+c.r, max({l,r,c.r})*2)) {
-        if (equal(l+r,c.r)) return {o - v*(r/l)};
-            return {o + v*(r/l)};
-        }
-        if (l+r+c.r < max({l,r,c.r})*2) return {};
-        double x = (l*l + r*r - c.r*c.r) / (2*l);
-        double y = sqrt(r*r - x*x);
-        V mid = o + v*(x/l);
-        v = v.rotate90();
-        return {mid + v*(y/l), mid - v*(y/l)};
+
+// 2点を結ぶ直線、垂直二等分線の計算
+// 2点 p1, p2 を通る直線 ax+by+c=0 を返す
+Line get_line(const Point& p1, const Point& p2) {
+    Line l;
+    l.a = p1.second - p2.second; // y1 - y2
+    l.b = p2.first - p1.first;   // x2 - x1
+    l.c = p1.first * p2.second - p2.first * p1.second; // x1*y2 - x2*y1
+    return l;
+}
+
+// 2点 p1, p2 の垂直二等分線 ax+by+c=0 を返す
+Line get_perpendicular_bisector(const Point& p1, const Point& p2) {
+    Line l;
+    l.a = p2.first - p1.first;   // x2 - x1
+    l.b = p2.second - p1.second; // y2 - y1
+    // - (a * 中点のx座標 + b * 中点のy座標)
+    l.c = -0.5 * ((p2.first * p2.first - p1.first * p1.first) + 
+                  (p2.second * p2.second - p1.second * p1.second));
+    return l;
+}
+
+// 2直線の交点
+// 交差しない（平行）の場合は {INFld, INFld} を返す
+Point get_intersection(const Line& l1, const Line& l2) {
+    ld det = l1.a * l2.b - l2.a * l1.b;
+    if (abs(det) < EPS) {
+        return {INFld, INFld}; // 平行
     }
-    bool isInside(const V& p) const {
-        return (p-o).norm() < r+eps;
-    }
-};
+    ld x = (l1.b * l2.c - l2.b * l1.c) / det;
+    ld y = (l1.c * l2.a - l2.c * l1.a) / det;
+    return {x, y};
+}
+
+// ccw (Counter-Clockwise)
+// p0 を基準としたときの p1 と p2 の位置関係を返す
+// 1: 反時計回り (COUNTER_CLOCKWISE)
+// -1: 時計回り (CLOCKWISE)
+// 2: p2, p0, p1 の順で一直線上 (ONLINE_BACK)
+// -2: p0, p1, p2 の順で一直線上 (ONLINE_FRONT)
+// 0: p0, p2, p1 の順で一直線上 (ON_SEGMENT)
+int ccw(const Point& p0, const Point& p1, const Point& p2) {
+    Vector a = p1 - p0;
+    Vector b = p2 - p0;
+    
+    if (cross(a, b) > EPS) return 1;
+    if (cross(a, b) < -EPS) return -1;
+    if (dot(a, b) < -EPS) return 2;
+    if (norm2(a) < norm2(b)) return -2;
+    return 0;
+}
 
 int main() {
+    // 出力の精度を設定
     cout << fixed << setprecision(12);
+    
+    // 1. ベクトルの足し算・引き算
+    Point p1 = {2.0, 3.0};
+    Point p2 = {1.0, 5.0};
+    Point p_add = p1 + p2;
+    Point p_sub = p1 - p2;
+    cout << "--- Vector Operations ---" << endl;
+    cout << "p1 + p2 = (" << p_add.first << ", " << p_add.second << ")" << endl;
+    cout << "p1 - p2 = (" << p_sub.first << ", " << p_sub.second << ")" << endl;
 
-    // 1) 線分交差チェック
-    V p1, p2, p3, p4;
-    cin >> p1 >> p2 >> p3 >> p4;
+    // 中点の計算
+    Point mid = midpoint(p1, p2);
+    cout << "--- Midpoint & Distance ---" << endl;
+    cout << "Midpoint of p1 and p2: (" << mid.first << ", " << mid.second << ")" << endl;
 
-    Line l1(p1, p2), l2(p3, p4);
-    cout << "segment_touch: " << (l1.touch(l2) ? "Yes" : "No") << "\n";
-    cout << "ccw(l1, p3): " << l1.ccw(p3) << "\n";
-    // ccwは
-    // 左回り(+1) / 右回り(-1)
-    // 線上かつ区間外(+2/-2)
-    // 線分上(0)
-    // を判定できる
-    cout << "ccw(l1, p4): " << l1.ccw(p4) << "\n";
-
-    // 2) 円と円の交点
-    V c1o, c2o;
-    double r1, r2;
-    cin >> c1o >> r1 >> c2o >> r2;
-
-    Circle c1(c1o, r1), c2(c2o, r2);
-    auto cps = c1.crossPoint(c2);
-
-    cout << "circle_cross_points_count: " << cps.size() << "\n";
-    rep(i, (ll)cps.size()) {
-        cout << "cp[" << i << "]: " << cps[i].x << " " << cps[i].y << "\n";
-    }
-
-    // 3) 点の内外判定
-    V q;
-    cin >> q;
-    cout << "point_in_c1: " << (c1.isInside(q) ? "Yes" : "No") << "\n";
-
-    // 4) ベクトル演算デモ（p1->p2, p1->p3）
-    V a = p2 - p1;
-    V b = p3 - p1;
-    cout << "dot(a,b): " << a.dot(b) << "\n";
-    cout << "cross(a,b): " << a.cross(b) << "\n";
-    cout << "|a|: " << a.norm() << "\n";
-    // a,bの順番は問わない 0度から180度の範囲で返す
-    cout << "angle_rad(a,b): " << a.angleRad(b) << "\n";
-    cout << "angle_deg(a,b): " << a.angleDeg(b) << "\n";
+    // 距離の計算
+    ld dist = distance2(p1, p2);
+    cout << "Distance between p1 and p2: " << dist << endl;
+    
+    // 2. 内積・外積・長さの2乗
+    Vector v1 = {3.0, 4.0};
+    Vector v2 = {4.0, -3.0};
+    cout << "\n--- Vector Products & Length ---" << endl;
+    cout << "Dot(v1, v2): " << dot(v1, v2) << " (0なら直交)" << endl;
+    cout << "Cross(v1, v2): " << cross(v1, v2) << endl;
+    cout << "Norm(v1) [squared]: " << norm2(v1) << " (長さは5なので2乗は25)" << endl;
+    
+    // 3 & 4. 直線と垂直二等分線
+    Point a = {0.0, 0.0};
+    Point b = {4.0, 0.0};
+    Line l_ab = get_line(a, b);
+    Line l_bisect = get_perpendicular_bisector(a, b);
+    cout << "\n--- Line Equations (ax + by + c = 0) ---" << endl;
+    cout << "Line AB: " << l_ab.a << "x + " << l_ab.b << "y + " << l_ab.c << " = 0" << endl;
+    cout << "Bisector of AB: " << l_bisect.a << "x + " << l_bisect.b << "y + " << l_bisect.c << " = 0" << endl;
+    
+    // 5. 2直線の交点
+    // l1: x + y - 2 = 0, l2: x - y = 0  (交点は 1.0, 1.0)
+    Line l1 = {1.0, 1.0, -2.0};
+    Line l2 = {1.0, -1.0, 0.0};
+    Point intersection = get_intersection(l1, l2);
+    cout << "\n--- Intersection ---" << endl;
+    cout << "Intersection of l1 & l2: (" << intersection.first << ", " << intersection.second << ")" << endl;
+    
+    // 6. CCW (位置関係)
+    Point p0 = {0.0, 0.0};
+    Point p_target1 = {1.0, 0.0};
+    Point p_target2 = {0.0, 1.0};
+    cout << "\n--- CCW ---" << endl;
+    cout << "CCW(p0, p_target1, p_target2): " << ccw(p0, p_target1, p_target2) << " (1なら反時計回り)" << endl;
 
     return 0;
 }
