@@ -15,6 +15,7 @@
 #include <fstream>
 #include <climits>
 #include <numeric>
+#include <atcoder/all>
 
 #define fi first
 #define se second
@@ -114,85 +115,186 @@ ll npow(ll x,ll y){
 void print(ld x){printf("%.20Lf\n", x);}
 
 ////////////////////////////////////////////////////////////////
+template <int CHAR_SIZE, char BASE>
+class Trie {
+private:
+    // Trie木の各ノードを表す構造体
+    struct Node {
+        std::vector<int> next;      // 子ノードのインデックス（存在しない場合は -1）
+        int pass_count;            // このノードを通過した単語の数
+        std::vector<int> accept_ids; // このノードで終了する単語のIDリスト
 
-/* Trie 木： 文字の種類(char_size)、ll型で0に対応する文字(base)
-    insert(word): 単語 word を Trie 木に挿入する
-    search(word): 単語 word が Trie 木にあるか判定する
-    start_with(prefix):  prefix が一致する単語が Trie 木にあるか判定する
-    count(): 挿入した単語の数を返す
-    size(): Trie 木の頂点数を返す
-    計算量：insert, search ともに O(M)（Mは単語の長さ）
-*/
-template <ll char_size, ll base>
-struct Trie {
-    struct Node {            // 頂点を表す構造体
-        vl next;    // 子の頂点番号を格納。存在しなければ-1
-        vl accept;  // 末端がこの頂点になる単語の word_id を保存
-        ll c;               // base からの間隔をll型で表現したもの
-        ll common;          // いくつの単語がこの頂点を共有しているか
-        Node(ll c_) : c(c_), common(0) {
-            next.assign(char_size, -1);
-        }
+        Node() : next(CHAR_SIZE, -1), pass_count(0) {}
     };
-    vc<Node> nodes;  // trie 木本体
-    ll root;
-    Trie() : root(0) {
-        nodes.push_back(Node(root));
+
+    std::vector<Node> nodes;  // 全ノードを保持する動的配列（nodes[0] が根）
+    int inserted_words_count; // 今までに挿入された累計単語数（単語IDとしても使用）
+
+    // 文字を [0, CHAR_SIZE-1] のインデックスに変換する内部関数
+    int get_char_idx(char c) const {
+        return c - BASE;
     }
-    // 単語の挿入
-    void insert(const string &word, ll word_id) {
-        ll node_id = 0;
-        for (ll i = 0; i < (ll)word.size(); i++) {
-            ll c = (ll)(word[i] - base);
-            ll &next_id = nodes[node_id].next[c];
-            if (next_id == -1) {  // 次の頂点が存在しなければ追加
-                next_id = (ll)nodes.size();
-                nodes.push_back(Node(c));
-            }
-            ++nodes[node_id].common;
-            node_id = next_id;
+
+    // 指定ノード以下の部分木に含まれる全単語のIDを再帰的に収集する内部関数
+    void collect_ids(int node_idx, std::vector<int>& result) const {
+        if (node_idx == -1) return;
+
+        // このノードで終了する単語のIDを追加
+        for (int id : nodes[node_idx].accept_ids) {
+            result.push_back(id);
         }
-        ++nodes[node_id].common;
-        nodes[node_id].accept.push_back(word_id);
+
+        // 全ての子ノードへ再帰
+        for (int c = 0; c < CHAR_SIZE; ++c) {
+            if (nodes[node_idx].next[c] != -1) {
+                collect_ids(nodes[node_idx].next[c], result);
+            }
+        }
     }
-    void insert(const string &word) {
-        insert(word, nodes[0].common);
+
+public:
+    // コンストラクタ：根ノード (index 0) を初期化
+    Trie() : inserted_words_count(0) {
+        nodes.emplace_back();
     }
-    // 単語とprefixの検索
-    bool search(const string &word, bool prefix = false) {
-        ll node_id = 0;
-        for (ll i = 0; i < (ll)word.size(); i++) {
-            ll c = (ll)(word[i] - base);
-            ll &next_id = nodes[node_id].next[c];
-            if (next_id == -1) {  // 次の頂点が存在しなければ終了
+
+    // 1. 単語 word を挿入し、割り当てられた単語IDを返す関数
+    int insert(const std::string& word) {
+        int node_idx = 0;
+        nodes[node_idx].pass_count++; // 根ノードを通る単語数を加算
+
+        for (char c : word) {
+            int char_idx = get_char_idx(c);
+            // 子ノードが存在しなければ新規作成
+            if (nodes[node_idx].next[char_idx] == -1) {
+                nodes[node_idx].next[char_idx] = static_cast<int>(nodes.size());
+                nodes.emplace_back();
+            }
+            node_idx = nodes[node_idx].next[char_idx];
+            nodes[node_idx].pass_count++; // ノードを通る単語数を加算
+        }
+
+        int word_id = inserted_words_count++;
+        nodes[node_idx].accept_ids.push_back(word_id);
+        return word_id;
+    }
+
+    // 2. 単語 word が挿入されているか検索する関数
+    bool search(const std::string& word) const {
+        int node_idx = 0;
+        for (char c : word) {
+            int char_idx = get_char_idx(c);
+            if (nodes[node_idx].next[char_idx] == -1) {
                 return false;
             }
-            node_id = next_id;
+            node_idx = nodes[node_idx].next[char_idx];
         }
-        return (prefix) ? true : nodes[node_id].accept.size() > 0;
+        return !nodes[node_idx].accept_ids.empty();
     }
-    // prefix を持つ単語が存在するかの検索
-    bool start_with(const string &prefix) {
-        return search(prefix, true);
+
+    // 3. 今までに挿入した累計単語数を返す関数
+    int count_words() const {
+        return inserted_words_count;
     }
-    // 挿入した単語の数
-    ll count() const {
-        return (nodes[0].common);
+
+    // 4. Trie木の全ノード数を返す関数
+    int size() const {
+        return static_cast<int>(nodes.size());
     }
-    // Trie木のノード数
-    ll size() const {
-        return ((ll)nodes.size());
+
+    // 指定した文字列（接頭辞）を通る単語の数を返す関数
+    int count_pass(const std::string& prefix) const {
+        int node_idx = 0;
+        for (char c : prefix) {
+            int char_idx = get_char_idx(c);
+            if (nodes[node_idx].next[char_idx] == -1) {
+                return 0;
+            }
+            node_idx = nodes[node_idx].next[char_idx];
+        }
+        return nodes[node_idx].pass_count;
+    }
+
+    // 条件指定1: 単語 S の prefix となっている挿入済単語の ID を全て返す関数
+    std::vector<int> get_prefixes_of(const std::string& S) const {
+        std::vector<int> res;
+        int node_idx = 0;
+
+        // 根ノード（空文字列が対応）に単語が完了していれば追加
+        for (int id : nodes[node_idx].accept_ids) {
+            res.push_back(id);
+        }
+
+        for (char c : S) {
+            int char_idx = get_char_idx(c);
+            if (nodes[node_idx].next[char_idx] == -1) {
+                break;
+            }
+            node_idx = nodes[node_idx].next[char_idx];
+            // 途中で単語が完了していればそのIDを追加
+            for (int id : nodes[node_idx].accept_ids) {
+                res.push_back(id);
+            }
+        }
+        return res;
+    }
+
+    // 条件指定2: 単語 T を prefix としている挿入済単語の ID を全て返す関数
+    std::vector<int> get_words_with_prefix(const std::string& T) const {
+        std::vector<int> res;
+        int node_idx = 0;
+
+        for (char c : T) {
+            int char_idx = get_char_idx(c);
+            if (nodes[node_idx].next[char_idx] == -1) {
+                return res; // 接頭辞 T を持つ単語は存在しない
+            }
+            node_idx = nodes[node_idx].next[char_idx];
+        }
+
+        // T に到達したノード以下の部分木からIDをすべて収集
+        collect_ids(node_idx, res);
+        return res;
     }
 };
-//参考　ABC353E
+
+// ==========================================
+// 使用例
+// ==========================================
 int main() {
-    Trie<26, 'A'> trie;
-    trie.insert("FIRE");
-    cout << trie.search("FIRE") << endl;  // 1 を返す
-    cout << trie.search("FI") << endl;    // 0 を返す
-    trie.insert("FIREMAN");
-    trie.insert("FIREARM");
-    trie.insert("FIREWORK");
-    trie.insert("ALGO");
+    Trie<26,'a'> trie;
+
+    // 単語の挿入
+    std::vector<std::string> words = {"app", "apple", "application", "apt", "bat"};
+    std::cout << "--- 単語の挿入 ---" << std::endl;
+    for (const auto& w : words) {
+        int id = trie.insert(w);
+        std::cout << "Inserted: " << w << " (ID: " << id << ")" << std::endl;
+    }
+
+    // 基本機能の検証
+    std::cout << "\n--- 基本機能 ---" << std::endl;
+    std::cout << "挿入した総単語数: " << trie.count_words() << std::endl;
+    std::cout << "Trie木のノード数: " << trie.size() << std::endl;
+    std::cout << "\"apple\" の検索結果: " << (trie.search("apple") ? "Found" : "Not Found") << std::endl;
+    std::cout << "\"appli\" の検索結果: " << (trie.search("appli") ? "Found" : "Not Found") << std::endl;
+    std::cout << "\"app\" を通る単語の数: " << trie.count_pass("app") << std::endl;
+
+    // 条件指定1: 単語 S の prefix となっている挿入済単語の ID
+    std::string S = "applepie";
+    std::cout << "\n--- S = \"" << S << "\" の prefix である単語の ID ---" << std::endl;
+    std::vector<int> prefix_ids = trie.get_prefixes_of(S);
+    for (int id : prefix_ids) {
+        std::cout << "ID: " << id << " (" << words[id] << ")" << std::endl;
+    }
+
+    // 条件指定2: 単語 T を prefix としている挿入済単語の ID
+    std::string T = "app";
+    std::cout << "\n--- T = \"" << T << "\" を prefix に持つ単語の ID ---" << std::endl;
+    std::vector<int> with_prefix_ids = trie.get_words_with_prefix(T);
+    for (int id : with_prefix_ids) {
+        std::cout << "ID: " << id << " (" << words[id] << ")" << std::endl;
+    }
+
     return 0;
 }
