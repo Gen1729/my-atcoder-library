@@ -23,6 +23,7 @@
 #include <cassert>
 #include <cstdbool>
 #include <cstdint>
+#include <random>
 //#include <atcoder/all>
 
 #define fi first

@@ -15,6 +15,7 @@
 #include <fstream>
 #include <climits>
 #include <numeric>
+#include <random>
 // #include <atcoder/all>
 
 #define fi first
@@ -393,4 +394,13 @@ int main(){
             cout << endl;
         }
     }
+
+    {
+        random_device rd;
+        mt19937 gen(rd());
+        ll MIN = 1;
+        ll MAX = 100;
+        uniform_int_distribution<ll> dist(MIN, MAX);// MIN <= n <=MAXの範囲で乱数を生成する
+        rep(i,10)cout << dist(gen) << endl;
+    } 
 }
