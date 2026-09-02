@@ -396,11 +396,13 @@ int main(){
     }
 
     {
+        // 乱数生成
+        // MIN <= n <=MAXの範囲で乱数を生成する
         random_device rd;
         mt19937 gen(rd());
         ll MIN = 1;
         ll MAX = 100;
-        uniform_int_distribution<ll> dist(MIN, MAX);// MIN <= n <=MAXの範囲で乱数を生成する
+        uniform_int_distribution<ll> dist(MIN, MAX);
         rep(i,10)cout << dist(gen) << endl;
     } 
 }
