@@ -415,22 +415,22 @@ int main() {
     cout << "Non-crossing segments: "
         << intersect(segment1_start, segment1_end, segment3_start, segment3_end) << endl; // 0
 
-        // 8. 点と直線・線分間の距離
-        Point point = {2.0, 3.0};
-        Line perpendicular = get_perpendicular_line(point, l_ab);
-        Point parallel_segment_start = {0.0, 3.0};
-        Point parallel_segment_end = {4.0, 3.0};
-        cout << "\n--- Geometry Distances ---" << endl;
-        cout << "Point-line distance squared: "
-            << distance_between_point_and_line2(point, l_ab) << endl;
-        cout << "Perpendicular line through point: "
-            << perpendicular.a << "x + " << perpendicular.b << "y + "
-            << perpendicular.c << " = 0" << endl;
-        cout << "Segment distance squared: "
-            << distance_between_segment_and_segment2(a, b, parallel_segment_start, parallel_segment_end) << endl;
-        cout << "Crossing segment distance squared: "
-            << distance_between_segment_and_segment2(segment1_start, segment1_end,
-                      segment2_start, segment2_end) << endl;
+    // 8. 点と直線・線分間の距離
+    Point point = {2.0, 3.0};
+    Line perpendicular = get_perpendicular_line(point, l_ab);
+    Point parallel_segment_start = {0.0, 3.0};
+    Point parallel_segment_end = {4.0, 3.0};
+    cout << "\n--- Geometry Distances ---" << endl;
+    cout << "Point-line distance squared: "
+        << distance_between_point_and_line2(point, l_ab) << endl;
+    cout << "Perpendicular line through point: "
+        << perpendicular.a << "x + " << perpendicular.b << "y + "
+        << perpendicular.c << " = 0" << endl;
+    cout << "Segment distance squared: "
+        << distance_between_segment_and_segment2(a, b, parallel_segment_start, parallel_segment_end) << endl;
+    cout << "Crossing segment distance squared: "
+        << distance_between_segment_and_segment2(segment1_start, segment1_end,
+                    segment2_start, segment2_end) << endl;
 
     return 0;
 }
