@@ -323,7 +323,7 @@ bool intersect(const Point& p1, const Point& p2,
 }
 
 // 線分 p1-p2 と線分 p3-p4 の距離の2乗を返す
-ld distance_between_line_segment2(const Point& p1, const Point& p2,
+ld distance_between_segment_and_segment2(const Point& p1, const Point& p2,
              const Point& p3, const Point& p4) {
     if (intersect(p1, p2, p3, p4)) return 0.0;
 
@@ -427,9 +427,9 @@ int main() {
             << perpendicular.a << "x + " << perpendicular.b << "y + "
             << perpendicular.c << " = 0" << endl;
         cout << "Segment distance squared: "
-            << distance_between_line_segment2(a, b, parallel_segment_start, parallel_segment_end) << endl;
+            << distance_between_segment_and_segment2(a, b, parallel_segment_start, parallel_segment_end) << endl;
         cout << "Crossing segment distance squared: "
-            << distance_between_line_segment2(segment1_start, segment1_end,
+            << distance_between_segment_and_segment2(segment1_start, segment1_end,
                       segment2_start, segment2_end) << endl;
 
     return 0;
