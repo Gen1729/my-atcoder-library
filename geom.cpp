@@ -282,6 +282,35 @@ int ccw(const Point& p0, const Point& p1, const Point& p2) {
     return 0;
 }
 
+// 線分 p1-p2 と線分 p3-p4 が交差するかを返す
+bool intersect(const Point& p1, const Point& p2,
+               const Point& p3, const Point& p4) {
+    auto orientation = [](const Point& a, const Point& b, const Point& c) {
+        return cross(b - a, c - a);
+    };
+    auto on_segment = [](const Point& a, const Point& b, const Point& p) {
+        return abs(cross(b - a, p - a)) < EPS
+            && min(a.first, b.first) - EPS <= p.first
+            && p.first <= max(a.first, b.first) + EPS
+            && min(a.second, b.second) - EPS <= p.second
+            && p.second <= max(a.second, b.second) + EPS;
+    };
+
+    ld o1 = orientation(p1, p2, p3);
+    ld o2 = orientation(p1, p2, p4);
+    ld o3 = orientation(p3, p4, p1);
+    ld o4 = orientation(p3, p4, p2);
+
+    if (((o1 > EPS && o2 < -EPS) || (o1 < -EPS && o2 > EPS))
+        && ((o3 > EPS && o4 < -EPS) || (o3 < -EPS && o4 > EPS))) {
+        return true;
+    }
+    return (abs(o1) < EPS && on_segment(p1, p2, p3))
+        || (abs(o2) < EPS && on_segment(p1, p2, p4))
+        || (abs(o3) < EPS && on_segment(p3, p4, p1))
+        || (abs(o4) < EPS && on_segment(p3, p4, p2));
+}
+
 int main() {
     // 出力の精度を設定
     cout << fixed << setprecision(12);
@@ -335,6 +364,19 @@ int main() {
     Point p_target2 = {0.0, 1.0};
     cout << "\n--- CCW ---" << endl;
     cout << "CCW(p0, p_target1, p_target2): " << ccw(p0, p_target1, p_target2) << " (1なら反時計回り)" << endl;
+
+    // 7. 線分の交差判定
+    Point segment1_start = {0.0, 0.0};
+    Point segment1_end = {4.0, 4.0};
+    Point segment2_start = {0.0, 4.0};
+    Point segment2_end = {4.0, 0.0};
+    Point segment3_start = {5.0, 0.0};
+    Point segment3_end = {5.0, 4.0};
+    cout << "\n--- Segment Intersection ---" << endl;
+    cout << "Crossing segments: "
+        << intersect(segment1_start, segment1_end, segment2_start, segment2_end) << endl; // 1
+    cout << "Non-crossing segments: "
+        << intersect(segment1_start, segment1_end, segment3_start, segment3_end) << endl; // 0
 
     return 0;
 }
