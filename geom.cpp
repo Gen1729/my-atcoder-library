@@ -252,6 +252,17 @@ Line get_perpendicular_bisector(const Point& p1, const Point& p2) {
     return l;
 }
 
+// 点 p と直線 l の距離の2乗を返す
+ld distance_between_point_and_line2(const Point& p, const Line& l) {
+    ld numerator = l.a * p.first + l.b * p.second + l.c;
+    return numerator * numerator / (l.a * l.a + l.b * l.b);
+}
+
+// 点 p を通り、直線 l に垂直な直線を返す
+Line get_perpendicular_line(const Point& p, const Line& l) {
+    return {l.b, -l.a, l.a * p.second - l.b * p.first};
+}
+
 // 2直線の交点
 // 交差しない（平行）の場合は {INFld, INFld} を返す
 Point get_intersection(const Line& l1, const Line& l2) {
@@ -309,6 +320,32 @@ bool intersect(const Point& p1, const Point& p2,
         || (abs(o2) < EPS && on_segment(p1, p2, p4))
         || (abs(o3) < EPS && on_segment(p3, p4, p1))
         || (abs(o4) < EPS && on_segment(p3, p4, p2));
+}
+
+// 線分 p1-p2 と線分 p3-p4 の距離の2乗を返す
+ld distance_between_line_segment2(const Point& p1, const Point& p2,
+             const Point& p3, const Point& p4) {
+    if (intersect(p1, p2, p3, p4)) return 0.0;
+
+    auto point_segment_distance2 = [](const Point& p,
+                                      const Point& a,
+                                      const Point& b) {
+        Vector ab = b - a;
+        ld ab_norm2 = norm2(ab);
+        if (ab_norm2 < EPS) return distance2(p, a);
+
+        ld t = dot(p - a, ab) / ab_norm2;
+        t = max(0.0L, min(1.0L, t));
+        Point projection = a + ab * t;
+        return distance2(p, projection);
+    };
+
+    return min({
+        point_segment_distance2(p1, p3, p4),
+        point_segment_distance2(p2, p3, p4),
+        point_segment_distance2(p3, p1, p2),
+        point_segment_distance2(p4, p1, p2)
+    });
 }
 
 int main() {
@@ -377,6 +414,23 @@ int main() {
         << intersect(segment1_start, segment1_end, segment2_start, segment2_end) << endl; // 1
     cout << "Non-crossing segments: "
         << intersect(segment1_start, segment1_end, segment3_start, segment3_end) << endl; // 0
+
+        // 8. 点と直線・線分間の距離
+        Point point = {2.0, 3.0};
+        Line perpendicular = get_perpendicular_line(point, l_ab);
+        Point parallel_segment_start = {0.0, 3.0};
+        Point parallel_segment_end = {4.0, 3.0};
+        cout << "\n--- Geometry Distances ---" << endl;
+        cout << "Point-line distance squared: "
+            << distance_between_point_and_line2(point, l_ab) << endl;
+        cout << "Perpendicular line through point: "
+            << perpendicular.a << "x + " << perpendicular.b << "y + "
+            << perpendicular.c << " = 0" << endl;
+        cout << "Segment distance squared: "
+            << distance_between_line_segment2(a, b, parallel_segment_start, parallel_segment_end) << endl;
+        cout << "Crossing segment distance squared: "
+            << distance_between_line_segment2(segment1_start, segment1_end,
+                      segment2_start, segment2_end) << endl;
 
     return 0;
 }
