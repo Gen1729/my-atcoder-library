@@ -258,6 +258,20 @@ ld distance_between_point_and_line2(const Point& p, const Line& l) {
     return numerator * numerator / (l.a * l.a + l.b * l.b);
 }
 
+// 点 p と線分 a-b の距離の2乗を返す
+ld distance_between_point_and_segment2(const Point& p,
+                                       const Point& a,
+                                       const Point& b) {
+    Vector ab = b - a;
+    ld ab_norm2 = norm2(ab);
+    if (ab_norm2 < EPS) return distance2(p, a);
+
+    ld t = dot(p - a, ab) / ab_norm2;
+    t = max(0.0L, min(1.0L, t));
+    Point projection = a + ab * t;
+    return distance2(p, projection);
+}
+
 // 点 p を通り、直線 l に垂直な直線を返す
 Line get_perpendicular_line(const Point& p, const Line& l) {
     return {l.b, -l.a, l.a * p.second - l.b * p.first};
@@ -327,25 +341,38 @@ ld distance_between_segment_and_segment2(const Point& p1, const Point& p2,
              const Point& p3, const Point& p4) {
     if (intersect(p1, p2, p3, p4)) return 0.0;
 
-    auto point_segment_distance2 = [](const Point& p,
-                                      const Point& a,
-                                      const Point& b) {
-        Vector ab = b - a;
-        ld ab_norm2 = norm2(ab);
-        if (ab_norm2 < EPS) return distance2(p, a);
-
-        ld t = dot(p - a, ab) / ab_norm2;
-        t = max(0.0L, min(1.0L, t));
-        Point projection = a + ab * t;
-        return distance2(p, projection);
-    };
-
     return min({
-        point_segment_distance2(p1, p3, p4),
-        point_segment_distance2(p2, p3, p4),
-        point_segment_distance2(p3, p1, p2),
-        point_segment_distance2(p4, p1, p2)
+        distance_between_point_and_segment2(p1, p3, p4),
+        distance_between_point_and_segment2(p2, p3, p4),
+        distance_between_point_and_segment2(p3, p1, p2),
+        distance_between_point_and_segment2(p4, p1, p2)
     });
+}
+
+// 多角形の面積を返す
+ld polygon_area(const vc<Point>& polygon) {
+    ld signed_double_area = 0.0;
+    for (size_t i = 0; i < polygon.size(); i++) {
+        signed_double_area += cross(polygon[i], polygon[(i + 1) % polygon.size()]);
+    }
+    return abs(signed_double_area) / 2.0;
+}
+
+// 多角形の重心を面積公式で求める
+Point polygon_area_formula(const vc<Point>& polygon) {
+    if (polygon.empty()) return {INFld, INFld};
+
+    ld signed_double_area = 0.0;
+    Point weighted_sum = {0.0, 0.0};
+    for (size_t i = 0; i < polygon.size(); i++) {
+        const Point& current = polygon[i];
+        const Point& next = polygon[(i + 1) % polygon.size()];
+        ld cross_value = cross(current, next);
+        signed_double_area += cross_value;
+        weighted_sum = weighted_sum + (current + next) * cross_value;
+    }
+    if (abs(signed_double_area) < EPS) return {INFld, INFld};
+    return weighted_sum / (3.0 * signed_double_area);
 }
 
 int main() {
@@ -423,6 +450,8 @@ int main() {
     cout << "\n--- Geometry Distances ---" << endl;
     cout << "Point-line distance squared: "
         << distance_between_point_and_line2(point, l_ab) << endl;
+    cout << "Point-segment distance squared: "
+        << distance_between_point_and_segment2(point, a, b) << endl;
     cout << "Perpendicular line through point: "
         << perpendicular.a << "x + " << perpendicular.b << "y + "
         << perpendicular.c << " = 0" << endl;
@@ -431,6 +460,14 @@ int main() {
     cout << "Crossing segment distance squared: "
         << distance_between_segment_and_segment2(segment1_start, segment1_end,
                     segment2_start, segment2_end) << endl;
+
+    // 9. 多角形の面積と面積公式
+    vc<Point> triangle = {{0.0, 0.0}, {4.0, 0.0}, {0.0, 3.0}};
+    Point triangle_center = polygon_area_formula(triangle);
+    cout << "\n--- Polygon ---" << endl;
+    cout << "Triangle area: " << polygon_area(triangle) << endl;
+    cout << "Triangle area formula: (" << triangle_center.first << ", "
+        << triangle_center.second << ")" << endl;
 
     return 0;
 }
