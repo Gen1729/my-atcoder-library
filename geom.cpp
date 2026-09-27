@@ -375,6 +375,65 @@ Point polygon_area_formula(const vc<Point>& polygon) {
     return weighted_sum / (3.0 * signed_double_area);
 }
 
+// 下側凸包を求める関数
+// 点群をx座標優先でソートした状態から、下側の境界線を走査して構築します。
+vc<Point> lower_hull(vc<Point> ps) {
+    int n = ps.size();
+    if (n <= 2) return ps;
+    
+    // x座標が昇順（等しい場合はy座標が昇順）になるようにソート
+    sort(ps.begin(), ps.end());
+
+    vc<Point> res;
+    for (int i = 0; i < n; i++) {
+        // 時計回り（右折）または一直線上の場合は直前の点を取り除く
+        // 厳密な凸包（途中の3点が一直線上に並ばない）にするため cross <= EPS としています
+        while (res.size() >= 2 && cross(res.back() - res[res.size() - 2], ps[i] - res.back()) < 0) {
+            res.pop_back();
+        }
+        res.push_back(ps[i]);
+    }
+    return res;
+}
+
+// 上側凸包を求める関数
+// 点群をx座標優先でソートした状態から、上側の境界線を走査して構築します。
+vc<Point> upper_hull(vc<Point> ps) {
+    int n = ps.size();
+    if (n <= 2) return ps;
+
+    // x座標が昇順（等しい場合はy座標が昇順）になるようにソート
+    sort(ps.begin(), ps.end());
+
+    vc<Point> res;
+    for (int i = 0; i < n; i++) {
+        // 反時計回り（左折）または一直線上の場合は直前の点を取り除く
+        while (res.size() >= 2 && cross(res.back() - res[res.size() - 2], ps[i] - res.back()) > 0) {
+            res.pop_back();
+        }
+        res.push_back(ps[i]);
+    }
+    return res;
+}
+
+// 下側凸包と上側凸包を合成して反時計回りの全凸包を求める関数
+vc<Point> convex_hull(vc<Point> ps) {
+    int n = ps.size();
+    if (n <= 2) return ps;
+
+    vc<Point> lower = lower_hull(ps);
+    vc<Point> upper = upper_hull(ps);
+
+    // lower は左から右への下側境界
+    // upper は左から右への上側境界なので、逆順に連結することで右から左への上側境界にする
+    // 両端の重複要素（端点）を除外して結合する
+    vc<Point> res = lower;
+    for (int i = (int)upper.size() - 2; i > 0; i--) {
+        res.push_back(upper[i]);
+    }
+    return res;
+}
+
 int main() {
     // 出力の精度を設定
     cout << fixed << setprecision(12);
@@ -468,6 +527,33 @@ int main() {
     cout << "Triangle area: " << polygon_area(triangle) << endl;
     cout << "Triangle area formula: (" << triangle_center.first << ", "
         << triangle_center.second << ")" << endl;
+
+    // 10. 凸包 (Convex Hull - Monotone Chain)
+    vc<Point> pts = {
+        {0.0, 0.0}, {2.0, 0.0}, {4.0, 0.0},
+        {1.0, 1.0}, {2.0, 3.0}, {3.0, 1.0},
+        {0.0, 4.0}, {4.0, 4.0}, {2.0, 2.0}
+    };
+
+    vc<Point> l_hull = lower_hull(pts);
+    vc<Point> u_hull = upper_hull(pts);
+    vc<Point> full_hull = convex_hull(pts);
+
+    cout << "\n--- Convex Hull ---" << endl;
+    cout << "Lower Hull:" << endl;
+    for (const auto& p : l_hull) {
+        cout << "  (" << p.first << ", " << p.second << ")" << endl;
+    }
+
+    cout << "Upper Hull:" << endl;
+    for (const auto& p : u_hull) {
+        cout << "  (" << p.first << ", " << p.second << ")" << endl;
+    }
+
+    cout << "Full Convex Hull (Counter-Clockwise):" << endl;
+    for (const auto& p : full_hull) {
+        cout << "  (" << p.first << ", " << p.second << ")" << endl;
+    }
 
     return 0;
 }
