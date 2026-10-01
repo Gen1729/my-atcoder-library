@@ -398,3 +398,19 @@ ll count_dfa(const Dfa& dfa, const vector<typename Dfa::Alphabet>& sigma, ll len
     }
     return ans;
 }
+
+// 演算子オーバーロード
+template <class A, class B>
+And<A, B> operator&(A a, B b) {
+    return And<A, B>(a, b);
+}
+
+template <class A, class B>
+Or<A, B> operator|(A a, B b) {
+    return Or<A, B>(a, b);
+}
+
+template <class A>
+Not<A> operator~(A a) {
+    return Not<A>(a);
+}
