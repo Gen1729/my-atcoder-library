@@ -40,25 +40,20 @@
 *   **`count_dfa(dfa, sigma, length)`**
     *   **仕様**: 状態遷移DPを実行します。アルファベット集合 `sigma` を用いて、長さ `length` で生成される遷移のうち、最終的に `dfa` が受理するパスの総数を計算します（答えは `MOD = 998244353` で計算されます）。
 
-### 5.新しいDFAの定義の仕方
-* `init()` DFAの開始頂点番号を返す
-* `next()` DFAの頂点番号qから記号cを得て遷移した先の頂点番号を返す
-* `accept()` DFAの頂点番号qが受理状態かどうかを返す
-
 ---
 
 ## 使用例
 
-「3の倍数 または 3が含まれる数」のうち、$K$ 以下のものを求める場合の実装例です。
+「3の倍数 または 3が含まれる数」のうち、 $A$ 以上 $B$ 以下のものを求める場合の実装例です。
 
 ```cpp
 int main() {
-    string K;
-    cin >> K; // 例: "38347"
+    string A,B;
+    cin >> A >> B;
     
-    // DPする桁数に合わせてKを0埋めする必要がある場合は、ここで整形する
-    // 今回はKの長さに合わせる
-    ll length = K.size();
+    // 問題によって0埋めするか判断する 今回はしない
+    ll lenA = A.size();
+    ll lenB = B.size();
     
     // アルファベットの定義 (0〜9)
     vector<ll> sigma = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -72,19 +67,19 @@ int main() {
     // 3. ナベアツ数の DFA (mod3 OR seen3)
     Or<MultipleOf, Seen> nabeatsu(mod3, seen3);
     
-    // 4. K以下を判定する DFA
-    Le le(K);
+    // 4. A未満とB以下を判定する DFA
+    Lt lt(A);
+    Le le(B);
     
     // 5. ナベアツ数 かつ K以下 を判定する DFA
-    And<Or<MultipleOf, Seen>, Le> final_dfa(nabeatsu, le);
+    And<Or<MultipleOf, Seen>, Lt> dfa1(nabeatsu, lt);
+    And<Or<MultipleOf, Seen>, Le> dfa2(nabeatsu, le);
+
+    ll ans = 0;
     
-    // count_dfa で長さlengthの文字列を探索
-    ll ans = count_dfa(final_dfa, sigma, length);
-    
-    // 0(文字列 "000...")はナベアツ条件で受理されてしまうため引くなどの調整
-    if (final_dfa.accept(final_dfa.init())) {
-       // ans = (ans - 1 + MOD) % MOD; (問題の仕様に応じて調整)
-    }
+    // 6. count_dfa で文字列を探索
+    ans -= count_dfa(dfa1, sigma, lenA);
+    ans += count_dfa(dfa2, sigma, lenB);
     
     cout << ans << endl;
     return 0;
