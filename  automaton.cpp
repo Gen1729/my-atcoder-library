@@ -234,55 +234,63 @@ struct Not {
 };
 
 // Le (Less than or Equal)
-// 限界文字列（ベクトル）以下の辞書順（桁DPの上限）を管理
 struct Le {
-    using State = pair<ll, int>; // {現在のインデックス, 状態(0:EQUAL, 1:LESS, 2:GREATER)}
+    using State = int;
     using Alphabet = ll;
     vector<Alphabet> limit;
-    Le(const vector<Alphabet>& limit) : limit(limit) {}
+    int less_state, greater_state;
+    Le(const vector<Alphabet>& limit) : limit(limit) {
+        less_state = limit.size() + 1;
+        greater_state = limit.size() + 2;
+    }
     Le(const string& s) {
         for(char c : s) limit.pb(c - '0');
+        less_state = limit.size() + 1;
+        greater_state = limit.size() + 2;
     }
-    State init() const { return {0, 0}; }
+    State init() const { return 0; }
     State next(const State& q, const Alphabet& c) const {
-        ll idx = q.fi; int status = q.se;
-        if (status != 0) return {idx + 1, status}; // 既に未満か超過が確定
-        if (idx >= (ll)limit.size()) return {idx + 1, 2}; // 文字列長を超えた場合
-        if (c < limit[idx]) return {idx + 1, 1};
-        if (c > limit[idx]) return {idx + 1, 2};
-        return {idx + 1, 0}; // c == limit[idx]
+        if (q == less_state || q == greater_state) return q;
+        if (q >= (int)limit.size()) return greater_state;
+        if (c < limit[q]) return less_state;
+        if (c > limit[q]) return greater_state;
+        return q + 1; // 完全に一致している文字数
     }
     bool accept(const State& q) const {
-        return q.se == 0 || q.se == 1; // EQUAL もしくは LESS
+        return q != greater_state;
     }
 };
 
 // Lt (Less Than)
-// 限界文字列（ベクトル）未満の辞書順を管理
 struct Lt {
-    using State = pair<ll, int>; 
+    using State = int;
     using Alphabet = ll;
     vector<Alphabet> limit;
-    Lt(const vector<Alphabet>& limit) : limit(limit) {}
+    int less_state, greater_state;
+    Lt(const vector<Alphabet>& limit) : limit(limit) {
+        less_state = limit.size() + 1;
+        greater_state = limit.size() + 2;
+    }
     Lt(const string& s) {
         for(char c : s) limit.pb(c - '0');
+        less_state = limit.size() + 1;
+        greater_state = limit.size() + 2;
     }
-    State init() const { return {0, 0}; }
+    State init() const { return 0; }
     State next(const State& q, const Alphabet& c) const {
-        ll idx = q.fi; int status = q.se;
-        if (status != 0) return {idx + 1, status};
-        if (idx >= (ll)limit.size()) return {idx + 1, 2};
-        if (c < limit[idx]) return {idx + 1, 1};
-        if (c > limit[idx]) return {idx + 1, 2};
-        return {idx + 1, 0};
+        if (q == less_state || q == greater_state) return q;
+        if (q >= (int)limit.size()) return greater_state;
+        if (c < limit[q]) return less_state;
+        if (c > limit[q]) return greater_state;
+        return q + 1;
     }
     bool accept(const State& q) const {
-        return q.se == 1; // LESSのみ許容 (EQUALはダメ)
+        return q == less_state;
     }
 };
 
 // MultipleOf(M)
-// 数値cを受け取り、状態として mod M を管理
+// Mの倍数かどうか判定
 struct MultipleOf {
     using State = ll;
     using Alphabet = ll;
@@ -352,7 +360,7 @@ struct ContainsAhoCorasick {
                     if (f == 0) { f = -1; break; }
                     f = nodes[f].fail;
                 }
-                nodes[v].fail = (f == -1) ? 0 : nodes[f].nxt[c];
+                nodes[v].fail = (f == -1) ? 0 : nodes[f].nxt.at(c);
                 q.push(v);
             }
         }
@@ -360,7 +368,7 @@ struct ContainsAhoCorasick {
     
     State init() const { return 0; }
     State next(const State& q, const Alphabet& c) const {
-        if (nodes[q].accept) return q; // 一度受理状態に入れば抜け出さない
+        if (nodes[q].accept) return q; // 受理に入れば固定
         ll curr = q;
         while (curr != -1 && !nodes[curr].nxt.count(c)) {
             if (curr == 0) { curr = -1; break; }
@@ -374,26 +382,64 @@ struct ContainsAhoCorasick {
     }
 };
 
-// count_dfa (std::countとの衝突を避けるためcount_dfaに変更)
-// 与えられたDFAとアルファベット集合に対し、長さ `length` の受理文字列の総数を数え上げる
+// count_dfa
+// ループ内での map の使用を避け、BFSで遷移テーブルを事前構築する
 template<class Dfa>
 ll count_dfa(const Dfa& dfa, const vector<typename Dfa::Alphabet>& sigma, ll length) {
-    map<typename Dfa::State, ll> dp;
-    dp[dfa.init()] = 1;
-    rep(i, length) {
-        map<typename Dfa::State, ll> next_dp;
-        for (const auto& p : dp) {
-            for (auto c : sigma) {
-                auto nq = dfa.next(p.fi, c);
-                next_dp[nq] = (next_dp[nq] + p.se) % MOD;
+    using State = typename Dfa::State;
+    
+    // 状態を整数IDにマッピングする
+    map<State, int> state_id;
+    vector<State> id_to_state;
+    
+    auto get_id = [&](const State& s) {
+        auto it = state_id.lower_bound(s);
+        if (it != state_id.end() && it->fi == s) {
+            return it->se;
+        }
+        int id = state_id.size();
+        state_id.emplace_hint(it, s, id);
+        id_to_state.pb(s);
+        return id;
+    };
+    
+    get_id(dfa.init());
+    vector<vector<int>> tr;
+    
+    // BFSにより到達可能状態の全遷移を静的な2次元配列として構成
+    int p = 0;
+    while (p < (int)id_to_state.size()) {
+        State cur = id_to_state[p];
+        tr.emplace_back(sigma.size());
+        for (int i = 0; i < (int)sigma.size(); ++i) {
+            tr[p][i] = get_id(dfa.next(cur, sigma[i]));
+        }
+        p++;
+    }
+    
+    int num_states = id_to_state.size();
+    vector<ll> dp(num_states, 0);
+    dp[0] = 1;
+    
+    // 高速なDPループ (配列アクセスのみ)
+    for (ll i = 0; i < length; ++i) {
+        vector<ll> next_dp(num_states, 0);
+        for (int u = 0; u < num_states; ++u) {
+            if (!dp[u]) continue;
+            for (int c = 0; c < (int)sigma.size(); ++c) {
+                int v = tr[u][c];
+                next_dp[v] += dp[u];
+                if (next_dp[v] >= MOD) next_dp[v] -= MOD;
             }
         }
-        dp = next_dp;
+        dp = move(next_dp);
     }
+    
     ll ans = 0;
-    for (const auto& p : dp) {
-        if (dfa.accept(p.fi)) {
-            ans = (ans + p.se) % MOD;
+    for (int u = 0; u < num_states; ++u) {
+        if (dfa.accept(id_to_state[u])) {
+            ans += dp[u];
+            if (ans >= MOD) ans -= MOD;
         }
     }
     return ans;
