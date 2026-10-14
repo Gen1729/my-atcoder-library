@@ -115,6 +115,7 @@ void print(ld x){printf("%.20Lf\n", x);}
 
 ////////////////////////////////////////////////////////////////
 
+// https://github.com/Gen1729/my-atcoder-library/blob/main/CycleDetection.cpp
 // ========== 無向グラフのサイクル検出 ==========
 class UndirectedGraph {
 private:

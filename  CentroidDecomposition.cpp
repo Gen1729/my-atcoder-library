@@ -177,6 +177,8 @@ void print(ld x){printf("%.20Lf\n", x);}
 
 //using mint = modint998244353;
 ////////////////////////////////////////////////////////////////
+
+// https://github.com/Gen1729/my-atcoder-library/blob/main/%20CentroidDecomposition.cpp
 // 共通部分 再帰的重心分解
 struct CentroidDecomposition {
     int N;

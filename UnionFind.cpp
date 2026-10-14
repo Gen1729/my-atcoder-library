@@ -114,6 +114,8 @@ ll npow(ll x,ll y){
 void print(ld x){printf("%.20Lf\n", x);}
 
 ////////////////////////////////////////////////////////////////
+
+// https://github.com/Gen1729/my-atcoder-library/blob/main/UnionFind.cpp
 struct UnionFind {
 	vector<ll> par; // 親ノード
 	vector<ll> rank; // ランク

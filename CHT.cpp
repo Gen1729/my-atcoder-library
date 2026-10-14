@@ -179,6 +179,8 @@ void print(ld x){printf("%.20Lf\n", x);}
 
 //using mint = modint998244353;
 ////////////////////////////////////////////////////////////////
+
+// https://github.com/Gen1729/my-atcoder-library/blob/main/CHT.cpp
 template <typename T, const T id>
 class convex_hull_trick {
     struct line {

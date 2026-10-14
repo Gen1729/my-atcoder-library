@@ -115,6 +115,7 @@ void print(ld x){printf("%.20Lf\n", x);}
 
 ////////////////////////////////////////////////////////////////
 
+// https://github.com/Gen1729/my-atcoder-library/blob/main/SegmentTree.cpp
 // 1. 範囲和クエリ + 区間加算 + 区間更新
 class SumSegmentTree {
 private:

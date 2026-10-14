@@ -143,6 +143,7 @@ void print(ld x){printf("%.20Lf\n", x);}
 
 ////////////////////////////////////////////////////////////////
 
+// https://github.com/Gen1729/my-atcoder-library/blob/main/FPS.cpp
 using mint = modint998244353;
 template<typename T> struct Factorial {
   int MAX;

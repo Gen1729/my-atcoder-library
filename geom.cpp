@@ -179,6 +179,8 @@ void print(ld x){printf("%.20Lf\n", x);}
 
 //using mint = modint998244353;
 ////////////////////////////////////////////////////////////////
+
+// https://github.com/Gen1729/my-atcoder-library/blob/main/geom.cpp
 const ld INFld = 1LL<<60;
 const ld EPS = 1e-10;
 const ld PI = acosl(-1.0);

@@ -142,6 +142,8 @@ ll extgcd(ll a, ll b, ll& i, ll& j) {
 void print(ld x){printf("%.20Lf\n", x);}
 
 ////////////////////////////////////////////////////////////////
+
+// https://github.com/Gen1729/my-atcoder-library/blob/main/angle_sort.cpp
 // 偏角ソート：整数ベクトル (x,y)
 namespace angle_sort {
 

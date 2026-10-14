@@ -5,7 +5,7 @@ using ll=long long;
 using tup2=tuple<ll,ll>;
 #define tup make_tuple
 
-
+// https://github.com/Gen1729/my-atcoder-library/blob/main/IntervalSet.cpp
 struct IntervalSet{
   set<tup2> s;
   IntervalSet(){

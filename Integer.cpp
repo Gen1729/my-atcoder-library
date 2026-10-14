@@ -117,6 +117,8 @@ ll npow(ll x,ll y){
 void print(ld x){printf("%.20Lf\n", x);}
 
 ////////////////////////////////////////////////////////////////
+
+// https://github.com/Gen1729/my-atcoder-library/blob/main/Integer.cpp
 const int MAX = 510000;
 
 ll fac[MAX], finv[MAX], inv[MAX];

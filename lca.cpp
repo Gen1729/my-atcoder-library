@@ -140,6 +140,8 @@ void print(ld x){printf("%.20Lf\n", x);}
 // - lca(u,v): 最小共通祖先
 // - dist(u,v): 辺数距離
 ////////////////////////////////////////////////////////////////
+
+// https://github.com/Gen1729/my-atcoder-library/blob/main/lca.cpp
 struct LCA {
     ll n, LOG;
     vvl parent; // parent[k][v] = v の 2^k 個上

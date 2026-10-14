@@ -116,6 +116,8 @@ ll npow(ll x,ll y){
 void print(ld x){printf("%.20Lf\n", x);}
 
 ////////////////////////////////////////////////////////////////
+
+// https://github.com/Gen1729/my-atcoder-library/blob/main/STL.cpp
 // [l, r) の範囲で「x以上」が初めて現れる位置を返す
 ll my_lower_bound(const vector<ll>& a, ll x) {
     ll l = 0, r = (ll)a.size();

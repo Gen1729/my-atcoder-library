@@ -11,11 +11,19 @@
 #include <bitset>
 #include <tuple>
 #include <map>
+#include <bit>
+#include <array>
+#include <limits>
+#include <type_traits>
+#include <utility>
 #include <functional>
 #include <fstream>
 #include <climits>
 #include <numeric>
 #include <cassert>
+#include <cstdbool>
+#include <cstdint>
+#include <random>
 //#include <atcoder/all>
 
 #define fi first
@@ -26,7 +34,7 @@
 
 #define nfor(i,s,n) for(ll i=(s);i<(n);i++)
 #define dfor(i,s,n) for(ll i=(s)-1;i>=n;i--)
-#define INF 2e18//9223372036854775807
+#define INF 2000000000000000000//9223372036854775807
 
 #define all(a)  a.begin(),a.end()
 #define rall(a) a.rbegin(),a.rend()
@@ -39,7 +47,7 @@
 
 #define vc vector
 
-#define sz(s) (long long)(s.size())
+#define for_sz(s) (long long)(s.size())
 
 #define YES cout << "Yes" << endl;
 #define NO cout << "No" << endl;
@@ -60,6 +68,7 @@
 using namespace std;
 //using namespace atcoder;
 using ll = long long;
+using ull = unsigned long long;
 using ld = long double;
 using pll = pair<ll,ll>;
 using vvvvvl = vector<vector<vector<vector<vector<ll> > > > >;
@@ -81,7 +90,17 @@ bool out_grid(ll i, ll j, ll h, ll w){//trueならcontinueする
     return(!(0 <= i && i < h && 0 <= j && j<w));
 }
 
-ll MOD = 998244353;
+template<class T>
+void cutoutV(vc<vc<T>> &G, ll H, ll W, ll mx, ll Mx, ll my, ll My){
+    if(!(0 <= mx && mx < H && 0 < Mx && Mx <= H && mx < Mx))return;
+    if(!(0 <= my && my < W && 0 < My && My <= W && my < My))return;
+
+    rep(i,Mx - mx)rep(j,My - my){
+        G[i][j] = G[i + mx][j + my];
+    }
+    G.resize(Mx - mx, vc<T>(My - my));
+    return;
+}
 
 ll modpow(ll x,ll y,ll m){
     ll a = x;
@@ -125,7 +144,7 @@ ll gcd(ll a, ll b) { return b?gcd(b,a%b):a;}
 ll lcm(ll a, ll b) { return a/gcd(a,b)*b;}
 
 // ai+bj=g
-// Ai+Bj=gcd(A,B)なるi,jを求める
+// ai+bj=gcd(a,b)なるi,jを求める
 ll extgcd(ll a, ll b, ll& i, ll& j) {
     if (b == 0) { i = 1; j = 0; return a;}
     ll p = a/b, g = extgcd(b,a-b*p,j,i);
@@ -133,12 +152,38 @@ ll extgcd(ll a, ll b, ll& i, ll& j) {
     return g;
 }
 
+vl topological_sort(const vvl& G){
+    ll N = (ll)G.size();
+    vl indeg(N, 0), order;
+    queue<ll> que;
+    rep(u, N){
+        for(ll v : G[u]) indeg[v]++;
+    }
+    rep(i, N){
+        if(indeg[i] == 0) que.push(i);
+    }
+    while(!que.empty()){
+        ll u = que.front();
+        que.pop();
+        order.pb(u);
+        for(ll v : G[u]){
+            indeg[v]--;
+            if(indeg[v] == 0) que.push(v);
+        }
+    }
+    return order;
+}
+
+ll MOD = 998244353;
+
 void print(ld x){printf("%.20Lf\n", x);}
 
+//using mint = modint998244353;
 ////////////////////////////////////////////////////////////////
+
+// https://github.com/Gen1729/my-atcoder-library/blob/main/rerooting.cpp
 #include<atcoder/modint>
 using mint = atcoder::modint;
-
 
 template <class E, class V, E (*merge)(E, E), E (*e)(), E (*put_edge)(V, int), V (*put_vertex)(E, int)>
 struct RerootingDP {

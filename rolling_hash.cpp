@@ -137,6 +137,8 @@ ll extgcd(ll a, ll b, ll& i, ll& j) {
 void print(ld x){printf("%.20Lf\n", x);}
 
 ////////////////////////////////////////////////////////////////
+
+// https://github.com/Gen1729/my-atcoder-library/blob/main/rolling_hash.cpp
 const ull MASK30 = (1UL << 30) - 1;
 const ull MASK31 = (1UL << 31) - 1;
 const ull rollMOD = (1UL << 61) - 1;

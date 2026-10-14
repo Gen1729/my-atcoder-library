@@ -137,6 +137,8 @@ ll extgcd(ll a, ll b, ll& i, ll& j) {
 void print(ld x){printf("%.20Lf\n", x);}
 
 ////////////////////////////////////////////////////////////////
+
+// https://github.com/Gen1729/my-atcoder-library/blob/main/AhoCorasick.cpp
 class AhoCorasick {
 public:
 	AhoCorasick(ll alphabet_size = 26, char base_char = 'a')

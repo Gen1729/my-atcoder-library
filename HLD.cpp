@@ -180,6 +180,7 @@ void print(ld x){printf("%.20Lf\n", x);}
 //using mint = modint998244353;
 ////////////////////////////////////////////////////////////////
 
+// https://github.com/Gen1729/my-atcoder-library/blob/main/HLD.cpp
 struct HLD {
     ll n;
     vector<vector<ll>> adj;

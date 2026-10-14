@@ -137,6 +137,8 @@ ll extgcd(ll a, ll b, ll& i, ll& j) {
 void print(ld x){printf("%.20Lf\n", x);}
 
 ////////////////////////////////////////////////////////////////
+
+// https://github.com/Gen1729/my-atcoder-library/blob/main/BinaryTrie.cpp
 struct BinaryTrie{
     ll sz;  // 追加済みノード数（次に使う ID）
     ll LOG; // 扱う整数の最大ビット長

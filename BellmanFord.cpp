@@ -179,6 +179,8 @@ void print(ld x){printf("%.20Lf\n", x);}
 
 //using mint = modint998244353;
 ////////////////////////////////////////////////////////////////
+
+// https://github.com/Gen1729/my-atcoder-library/blob/main/BellmanFord.cpp
 /**
  * ベルマンフォード法による最短経路計算
  * * @param G グラフの隣接リスト (to, cost)

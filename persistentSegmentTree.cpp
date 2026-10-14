@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <limits>
 
+// https://github.com/Gen1729/my-atcoder-library/blob/main/persistentSegmentTree.cpp
 /*
 Persistent Lazy Segment Tree (functional / path-copying)
 
